@@ -4,105 +4,64 @@ Human-oriented map of this repository. Coding agents should treat [`AGENTS.md`](
 
 ## What this repo is
 
-A **base template** for **GDS-compliant** frontends: backend languages (e.g. TypeScript, Go, Python) generate HTML; **GOV.UK Frontend** is the only UI library; **no frontend frameworks** for UI. Exact **HTML parity** against official Frontend fixtures. See [project-purpose.md](project-purpose.md).
+A **Java specialised line** for **GDS-compliant** frontends: **Spring Boot + Thymeleaf** generate HTML; **GOV.UK Frontend** is the only UI library; **no frontend frameworks** for UI. Exact **HTML parity** against official Frontend fixtures. See [project-purpose.md](project-purpose.md) and [tech-stack.md](tech-stack.md).
 
-**Implementation language and templating stack are TBD.** Until confirmed, do not invent wrapper project paths or framework idioms beyond [tech-stack.md](tech-stack.md). Once chosen, organise the wrapper using that language’s **current best practices**.
+**Stack:** Java 25 LTS, Spring Boot 4.1, Thymeleaf, Maven. Component HTML is rendered by native Java ports of Frontend macros (`uk.gov.example.govuk`); page shells use Thymeleaf.
 
-**GOV.UK Frontend is Node + Nunjucks by default.** Install `govuk-frontend` from npm, treat Nunjucks `template.njk` / `fixtures.json` as the HTML contract, and keep Node scripts for refreshing and verifying fixtures — even if the wrapper is another language.
+**GOV.UK Frontend is Node + Nunjucks upstream.** Install `govuk-frontend` from npm for fixtures, CSS (via Sass), and JS — do **not** call Nunjucks at request time from this Java line.
+
+**Demo service:** [example-service.md](example-service.md) (rod fishing licence). **Hosting:** [deploying-on-render.md](deploying-on-render.md).
 
 **Official guidance:** search the URLs in [guidance-sources.md](guidance-sources.md).
 
 **Priorities:** frontend web performance → frontend security → reduced maintenance → accessibility → inclusive design ([priorities.md](priorities.md)).
 
-**Documentation:** every lasting change is documented for **humans and agents** ([documentation-structure.md](documentation-structure.md)).
-
-**HTML:** prefer **Nunjucks macros** from `govuk-frontend`; set up official fixtures for extensive **100% parity** tests of backend output. Do not copy-paste component HTML from each release as the long-term approach. Before Frontend upgrades, always read https://github.com/alphagov/govuk-frontend/releases/latest.
-
-## Priorities
-
-See [priorities.md](priorities.md). Short version: frontend web performance → frontend security → reduced maintenance → accessibility → inclusive design.
-
 ## Components vs patterns
 
-| Kind          | What it is                                                               | How we build it                                  | Fixture parity?                                                         |
-| ------------- | ------------------------------------------------------------------------ | ------------------------------------------------ | ----------------------------------------------------------------------- |
-| **Component** | Design System building block (button, text input, …)                     | Library wrapper that renders exact Frontend HTML | **Yes** — official `fixtures.json`                                      |
-| **Pattern**   | Guidance for a journey or page composition (addresses, check answers, …) | Compose shipped components into pages            | **No** — follow Design System guidance; no invented pattern HTML suites |
+| Kind          | What it is                                                               | How we build it                       | Fixture parity?                                                         |
+| ------------- | ------------------------------------------------------------------------ | ------------------------------------- | ----------------------------------------------------------------------- |
+| **Component** | Design System building block (button, text input, …)                     | Java renderer matching Frontend HTML  | **Yes** — official `fixtures.json`                                      |
+| **Pattern**   | Guidance for a journey or page composition (addresses, check answers, …) | Compose shipped components into pages | **No** — follow Design System guidance; no invented pattern HTML suites |
 
-## Repo map (intended)
-
-Exact paths follow the chosen language’s conventions — record them in [tech-stack.md](tech-stack.md). Conceptually expect:
+## Repo map
 
 ```text
-AGENTS.md                 # Slim agent playbook
-docs/                     # All documentation (this folder)
-baseline/                 # Shared performance + OWASP header contract (sync to language lines)
-styles/                   # Sass entry + govuk-overrides (compiles to dist/stylesheets/)
-scripts/                  # Node build helpers (styles, future upgrade tooling)
-<src>/                    # App + component library (layout per language best practice)
-  …/govuk/…               # One unit per component + fixtures.json
-  …/layouts/…             # Page template / chrome
-  …/previews/…            # Dev-only parity browser per component
-  …/fixtures/…            # Dev-only raw HTML fragment endpoints
-tests/                    # Structural, parity (wrapper language), Nunjucks suite (Node)
-scripts/ or tasks/        # Frontend upgrade automation (often Node + wrapper tooling)
+AGENTS.md
+docs/                     # Dual-audience documentation
+baseline/                 # Shared performance + OWASP header contract
+styles/                   # Sass entry + govuk-overrides → dist/stylesheets/
+scripts/                  # Node build helpers (styles)
+src/main/java/uk/gov/example/
+  govuk/                  # Component renderers + fixture loader
+  baseline/               # Java port of baseline/policy.json
+  service/                # Rod licence journey model/validation
+  web/                    # Controllers, filters, page chrome
+  session/                # In-memory sessions
+src/main/resources/templates/
+src/test/java/…           # Fixture parity + journey + unit tests
+Dockerfile / render.yaml  # Render.com demo hosting
 ```
 
-## Run modes (intended)
+## Run modes
 
-| Mode    | Purpose                                                                                   |
-| ------- | ----------------------------------------------------------------------------------------- |
-| Preview | Local server for component previews and pattern demos                                     |
-| Test    | Unit/parity tests (wrapper) + Nunjucks fixture verification (Node)                        |
-| Verify  | Config check + fixtures + full test suite (CI equivalent)                                 |
-| Upgrade | Mechanical Frontend bump — see [upgrading-govuk-frontend.md](upgrading-govuk-frontend.md) |
-
-Command names for the _wrapper_ are stack-specific — document them in [tech-stack.md](tech-stack.md). Expect **Node**/npm for `govuk-frontend` install and the Nunjucks suite regardless.
+| Mode    | Command                                                                       |
+| ------- | ----------------------------------------------------------------------------- |
+| Preview | `npm ci && npm run build:styles && DEMOS_ENABLED=true ./mvnw spring-boot:run` |
+| Test    | `npm test` then `./mvnw test`                                                 |
+| Verify  | `npm run verify && ./mvnw verify`                                             |
+| Deploy  | See [deploying-on-render.md](deploying-on-render.md)                          |
 
 ## Testing mindset
 
-1. **Parity checks (primary)** compare **backend / library** output to fixture `html` with ordinal string equality — every fixture from the pinned Frontend release.
-2. **Nunjucks suite (secondary)** compares Frontend macros to stored fixture `html` to catch **stale fixtures** only.
-3. **Never** edit fixture `html` to make tests pass — fix the renderer.
-4. **Never** normalise HTML in tests.
-5. A green Nunjucks suite alone does **not** prove the backend language is correct.
+1. **Parity checks (primary)** compare Java `Render` output to fixture `html` for every fixture.
+2. **Never** edit fixture `html` to make tests pass — fix the renderer.
+3. JaCoCo **100%** applies to application packages outside `uk.gov.example.govuk` (that package is gated by fixture parity).
 
 Details: [testing-components.md](testing-components.md).
 
-## Troubleshooting
+## Related
 
-| Symptom                        | Likely cause                                                |
-| ------------------------------ | ----------------------------------------------------------- |
-| Parity fails on whitespace     | Renderer ≠ Nunjucks `template.njk` / `{%-` stripping        |
-| Encoding differs (`'` vs `'`)  | Used framework HTML encoder instead of Nunjucks `escape`    |
-| Attribute order differs        | Built attributes in code property order, not template order |
-| Preview/fixture 404 in tests   | Test host not enabling Dev/Testing routes                   |
-| Logo unreadable / wrong header | Frontend 5 header classes with Frontend 6+ CSS              |
-| Editing fixtures “fixes” tests | Wrong fix — update renderer                                 |
-
-More pitfalls: [creating-components.md](creating-components.md).
-
-## Consistency tooling (today)
-
-While the wrapper language is TBD, Node tooling keeps docs and shared config consistent:
-
-```sh
-npm install
-npm run build:styles # Sass → dist/stylesheets/application.css
-npm test             # baseline headers + Sass pipeline (100% coverage)
-npm run verify:docs  # Prettier + markdownlint
-npm run verify       # docs + build:styles + tests
-```
-
-See [CONTRIBUTING.md](../CONTRIBUTING.md). Dotfiles: `.editorconfig`, `.prettierrc.json`, `.markdownlint-cli2.jsonc`, `.nvmrc`, `.vscode/`, `.cursor/rules/`, `.github/`.
-
-## Next reads
-
-1. [documentation-structure.md](documentation-structure.md)
-2. [tech-stack.md](tech-stack.md)
-3. [page-shell.md](page-shell.md) and [layout-chrome.md](layout-chrome.md)
-4. [govuk-components.md](govuk-components.md)
-5. [service-assessment-readiness.md](service-assessment-readiness.md)
-6. [frontend-performance.md](frontend-performance.md) and [frontend-security.md](frontend-security.md)
-7. [styles.md](styles.md)
-8. [upgrading-govuk-frontend.md](upgrading-govuk-frontend.md)
+- [example-service.md](example-service.md)
+- [preview-server.md](preview-server.md)
+- [deploying-on-render.md](deploying-on-render.md)
+- [styles.md](styles.md) — Sass cascade; no `!important` in service CSS

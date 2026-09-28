@@ -1,17 +1,21 @@
-# GOV.UK Frontend example
+# GOV.UK Frontend example (Java)
 
-**Base template** for **GDS-compliant** government frontends: standardised backends (TypeScript, Go, Python, …) + **[GOV.UK Frontend](https://frontend.design-system.service.gov.uk/)** (macros / fixtures as the HTML contract) — **no** React/Vue/Angular/Svelte for UI. Official fixtures enable **100% HTML parity** testing of backend output. Node-adjacent lines may call Nunjucks macros directly; other languages generate HTML natively.
+**Specialised Java line** of the GDS-compliant frontend template: **Spring Boot + Thymeleaf** + **[GOV.UK Frontend](https://frontend.design-system.service.gov.uk/)** — **no** React/Vue/Angular/Svelte for UI. Official fixtures enable **100% HTML parity** testing of Java-rendered component HTML.
 
-**Implementation language: TBD** — see [`docs/tech-stack.md`](docs/tech-stack.md).
+**Stack:** Java 25 · Spring Boot 4.1 · Thymeleaf · Maven — see [`docs/tech-stack.md`](docs/tech-stack.md).
 
-## Language lines
+## What you get
 
-Specialised repos that track this template’s shared playbooks via a `template` remote + path sync:
+- **Apply for a rod fishing licence** — demo journey from start to confirmation ([`docs/example-service.md`](docs/example-service.md))
+- **Component catalogue** at `/components` — every Frontend 6.5.1 component with all fixture variations ([`docs/preview-server.md`](docs/preview-server.md))
+- **Render.com** Docker Blueprint for a public blog demo ([`docs/deploying-on-render.md`](docs/deploying-on-render.md))
+
+## Related language lines
 
 | Line              | Repository                                                                                              |
 | ----------------- | ------------------------------------------------------------------------------------------------------- |
 | TypeScript (Node) | [Nooshu/govuk-frontend-example-typescript](https://github.com/Nooshu/govuk-frontend-example-typescript) |
-| Go                | [Nooshu/govuk-frontend-example-go](https://github.com/Nooshu/govuk-frontend-example-go)                 |
+| Java (this repo)  | [Nooshu/govuk-frontend-example-java](https://github.com/Nooshu/govuk-frontend-example-java)             |
 
 ## Priorities
 
@@ -24,16 +28,28 @@ Frontend web performance → frontend security → reduced maintenance → acces
 | **Human developer** | [`docs/onboarding.md`](docs/onboarding.md) → [`CONTRIBUTING.md`](CONTRIBUTING.md) → [`docs/`](docs/README.md)                                                  |
 | **AI coding agent** | [`AGENTS.md`](AGENTS.md) → [`.cursor/skills/gds-compliant-frontend/`](.cursor/skills/gds-compliant-frontend/SKILL.md) → playbooks in [`docs/`](docs/README.md) |
 
-How docs are split for both audiences: [`docs/documentation-structure.md`](docs/documentation-structure.md).
-
-## Quick local checks (docs / Node tooling)
+## Quick start
 
 ```sh
-npm install
+# Node 22+ (Frontend pin + Sass)
+npm ci
 npm run build:styles
-npm test
-npm run verify:docs
+
+# Java 25
+./mvnw spring-boot:run
+# http://127.0.0.1:8080  — set DEMOS_ENABLED=true for /components
 ```
+
+## Verify
+
+```sh
+npm run verify          # docs + Sass + baseline tests
+./mvnw verify           # fixture parity + journey tests + JaCoCo
+```
+
+## Deploy
+
+See [`docs/deploying-on-render.md`](docs/deploying-on-render.md) for the Blueprint checklist.
 
 ## Licence and security
 

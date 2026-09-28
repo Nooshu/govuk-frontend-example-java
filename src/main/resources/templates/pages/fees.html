@@ -1,0 +1,17 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-l" th:text="${heading}">Licence fees</h1>
+          <p class="govuk-body">
+            These are example fees for this service. A live service would take payment after you
+            check your answers.
+          </p>
+          <th:block th:utext="${tableHtml}"></th:block>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

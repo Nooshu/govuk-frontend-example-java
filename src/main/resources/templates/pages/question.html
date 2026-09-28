@@ -1,0 +1,24 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <th:block th:if="${errorSummaryHtml != null}" th:utext="${errorSummaryHtml}"></th:block>
+          <form method="post" novalidate th:action="${formAction}" th:attr="enctype=${enctype}">
+            <input type="hidden" name="csrf" th:value="${csrf}" />
+            <input
+              th:if="${returnTo != null and !#strings.isEmpty(returnTo)}"
+              type="hidden"
+              name="returnTo"
+              th:value="${returnTo}"
+            />
+            <h1 th:if="${pageHeading}" class="govuk-heading-l" th:text="${heading}"></h1>
+            <th:block th:each="field : ${fieldHtml}" th:utext="${field}"></th:block>
+            <th:block th:utext="${continueButtonHtml}"></th:block>
+          </form>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

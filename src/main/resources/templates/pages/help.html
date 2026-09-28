@@ -1,0 +1,14 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-l" th:text="${heading}">Help</h1>
+          <p class="govuk-body">Help for this example service.</p>
+          <th:block th:utext="${accordionHtml}"></th:block>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

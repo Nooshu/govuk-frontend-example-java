@@ -1,0 +1,51 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+          <h1 class="govuk-heading-l" th:text="${componentTitle}"></h1>
+          <p class="govuk-body">
+            Preview of the Java renderer for this component. Choose a version below to compare the
+            Java HTML with the official fixture from GOV.UK Frontend
+            <th:block th:text="${frontendVersion}"></th:block>.
+          </p>
+          <p class="govuk-body">
+            <a
+              class="govuk-link"
+              th:href="${designSystemUrl}"
+              th:text="${componentTitle} + ' on the GOV.UK Design System'"
+            ></a>
+          </p>
+          <h2 class="govuk-heading-m">
+            Current version: <th:block th:text="${fixtureName}"></th:block>
+          </h2>
+          <th:block th:utext="${parityHtml}"></th:block>
+          <th:block th:if="${descriptionHtml != null}" th:utext="${descriptionHtml}"></th:block>
+          <div class="app-component-preview">
+            <h3 class="govuk-heading-s">Component preview</h3>
+            <div class="app-component-preview__frame" th:utext="${renderedHtml}"></div>
+          </div>
+          <h2 class="govuk-heading-m">Versions (Fixtures)</h2>
+          <nav aria-label="Versions">
+            <ul class="govuk-list">
+              <li th:each="fixture : ${fixtures}">
+                <strong
+                  th:if="${fixture.current()}"
+                  aria-current="true"
+                  th:text="${fixture.name()}"
+                ></strong>
+                <a
+                  th:unless="${fixture.current()}"
+                  class="govuk-link"
+                  th:href="@{/components/{name}(name=${componentName},fixture=${fixture.name()})}"
+                  th:text="${fixture.name()}"
+                ></a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

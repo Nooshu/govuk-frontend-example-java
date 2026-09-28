@@ -1,0 +1,32 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-l" th:text="${heading}">About this example</h1>
+          <p class="govuk-body">
+            This Java example shows how to build a GOV.UK service where the Spring Boot server
+            generates every page. It is not a real licensing service.
+          </p>
+          <p class="govuk-body">
+            Component HTML comes from GOV.UK Frontend
+            <th:block th:text="${frontendVersion}"></th:block>, and tests compare it with every
+            official fixture in that release.
+          </p>
+          <h2 class="govuk-heading-m">In this example</h2>
+          <ul class="govuk-list govuk-list--bullet">
+            <li><a class="govuk-link" href="/">Start page</a></li>
+            <li><a class="govuk-link" href="/task-list">Task list</a></li>
+            <li><a class="govuk-link" href="/fees">Licence fees</a></li>
+            <li><a class="govuk-link" href="/help">Help</a></li>
+            <li><a class="govuk-link" href="/guidance">Guidance</a></li>
+            <li th:if="${demosEnabled}">
+              <a class="govuk-link" href="/components">Component catalogue</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

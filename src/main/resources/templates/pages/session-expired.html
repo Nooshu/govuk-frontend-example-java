@@ -1,0 +1,14 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-l" th:text="${heading}">Sorry, your session has expired</h1>
+          <p class="govuk-body">Your answer was not saved. Start again.</p>
+          <th:block th:utext="${startAgainHtml}"></th:block>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

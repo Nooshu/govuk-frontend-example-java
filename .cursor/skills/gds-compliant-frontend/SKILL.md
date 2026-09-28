@@ -1,12 +1,12 @@
 ---
 name: gds-compliant-frontend
 description: >-
-  Builds GDS-compliant government frontends from this base template using
-  standardised backend languages (TypeScript, Go, Python, etc.) with GOV.UK
-  Frontend macros / fixtures as the HTML contract (Nunjucks in-process
-  on Node-adjacent stacks; native HTML generation elsewhere) and fixture
+  Builds GDS-compliant government frontends from this Java specialised line using
+  Java / Spring Boot / Thymeleaf with GOV.UK
+  Frontend macros / fixtures as the HTML contract (native Java HTML generation;
+  Node only for install, fixtures, and Sass) and fixture
   HTML parity, no SPA/frontend frameworks. Use when scaffolding services,
-  choosing stack, applying Service
+  applying Service
   Standard or Technology Code of Practice guidance, implementing GOV.UK
   components/patterns, upgrading govuk-frontend, or verifying assessment-shaped UI.
 ---
@@ -15,11 +15,11 @@ description: >-
 
 ## What this project is
 
-A **base template** for **GDS-compliant** frontends that:
+A **Java specialised line** for **GDS-compliant** frontends that:
 
-- Use **standardised backend technologies** (e.g. TypeScript/Node, Go, Python) for the server and HTML generation
+- Use **Java / Spring Boot / Thymeleaf** for the server and HTML generation
 - Use **[GOV.UK Frontend](https://frontend.design-system.service.gov.uk/)** (latest pinned version) as the **only** frontend component library
-- Generate component HTML from Frontend’s macros/`template.njk` contract — Nunjucks in-process on Node-adjacent stacks; **native** HTML in Go/Python/etc. Do **not** copy-paste HTML from each Frontend release as the long-term approach, and do **not** shell out to Node solely to render HTML from a non-Node backend
+- Generate component HTML from Frontend’s macros/`template.njk` contract via **native Java renderers**. Do **not** copy-paste HTML from each Frontend release as the long-term approach, and do **not** shell out to Node solely to render HTML
 - Wire official **test fixtures** for extensive **100% HTML parity** testing of backend-generated markup
 - Do **not** use frontend frameworks (React, Vue, Angular, Svelte, Next.js client apps, etc.) for UI
 
@@ -29,13 +29,13 @@ Detail for humans: [`docs/project-purpose.md`](../../../docs/project-purpose.md)
 
 ## Non-negotiable stack shape
 
-| Layer               | Choice                                                                                                                |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| UI                  | GOV.UK Frontend only (`govuk-*`, official JS via `initAll()`)                                                         |
-| HTML generation     | Nunjucks macros when Node-adjacent; otherwise native wrapper renderers that stay fixture-parity with those macros     |
-| Frontend frameworks | **Forbidden** for UI                                                                                                  |
-| Parity              | Official `fixtures.json` + ordinal HTML equality against backend output                                               |
-| Upstream            | Node package + Nunjucks / `template.njk` / fixtures (install/Sass/freshness — not required for non-Node request HTML) |
+| Layer               | Choice                                                                                                    |
+| ------------------- | --------------------------------------------------------------------------------------------------------- |
+| UI                  | GOV.UK Frontend only (`govuk-*`, official JS via `initAll()`)                                             |
+| HTML generation     | Native Java renderers tracking Frontend macros/`template.njk` (fixture parity); Thymeleaf for page shells |
+| Frontend frameworks | **Forbidden** for UI                                                                                      |
+| Parity              | Official `fixtures.json` + ordinal HTML equality against Java output                                      |
+| Upstream            | Node package + Nunjucks / `template.njk` / fixtures (install/Sass/freshness — not for request-time HTML)  |
 
 ## Authoritative guidance (search these first)
 

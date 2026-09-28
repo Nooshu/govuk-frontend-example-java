@@ -1,0 +1,20 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <th:block th:utext="${panelHtml}"></th:block>
+          <h2 class="govuk-heading-m">What happens next</h2>
+          <p class="govuk-body">
+            This example does not take payment or send email. In a live service we would email your
+            licence to you.
+          </p>
+          <p class="govuk-body">
+            <a class="govuk-link" href="/new-application">Apply for another licence</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

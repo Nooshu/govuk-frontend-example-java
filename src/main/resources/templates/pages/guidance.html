@@ -1,0 +1,13 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-full">
+          <h1 class="govuk-heading-l" th:text="${heading}">Guidance</h1>
+          <th:block th:utext="${tabsHtml}"></th:block>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

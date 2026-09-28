@@ -1,0 +1,32 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-l" th:text="${heading}">Component catalogue</h1>
+          <p class="govuk-body">
+            Every GOV.UK Frontend component in version
+            <th:block th:text="${frontendVersion}"></th:block>. This is the preview homepage: each
+            link opens that component’s own page. Markup is rendered by this service’s Java
+            component library, not by Nunjucks at request time.
+          </p>
+          <p class="govuk-body">
+            This page lists links only — each component page shows versions (fixtures) and a live
+            preview.
+          </p>
+          <ul class="govuk-list">
+            <li th:each="component : ${components}">
+              <a
+                class="govuk-link"
+                th:href="@{/components/{name}(name=${component.name()})}"
+                th:text="${component.title()}"
+              ></a>
+              <p class="govuk-body" th:text="${component.description()}"></p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

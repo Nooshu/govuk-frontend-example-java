@@ -1,0 +1,24 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <th:block th:if="${noticeHtml != null}">
+        <div class="govuk-grid-row">
+          <div class="govuk-grid-column-two-thirds">
+            <th:block th:utext="${noticeHtml}"></th:block>
+          </div>
+        </div>
+      </th:block>
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <th:block th:if="${errorSummaryHtml != null}" th:utext="${errorSummaryHtml}"></th:block>
+          <form method="post" action="/cookies" novalidate>
+            <input type="hidden" name="csrf" th:value="${csrf}" />
+            <th:block th:utext="${radiosHtml}"></th:block>
+            <th:block th:utext="${saveButtonHtml}"></th:block>
+          </form>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

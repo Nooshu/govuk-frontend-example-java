@@ -1,0 +1,17 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <form method="post" action="/check-answers" novalidate>
+            <input type="hidden" name="csrf" th:value="${csrf}" />
+            <h1 class="govuk-heading-l" th:text="${heading}">Check your answers</h1>
+            <th:block th:utext="${summaryHtml}"></th:block>
+            <th:block th:utext="${submitButtonHtml}"></th:block>
+          </form>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

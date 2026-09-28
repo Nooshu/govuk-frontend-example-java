@@ -66,7 +66,8 @@ public class ComponentsController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND);
       }
       String rendered = Render.mustRender(name, fixture.options());
-      boolean parity = rendered.equals(fixture.html().trim());
+      // Same contract as RenderFixtureParityTest: Java output ≡ official fixture html.
+      boolean parity = rendered.equals(fixture.html());
       ComponentInfo info = ComponentCatalogue.describe(name);
       chrome.apply(model, request, session, info.title(), false, "en", false, "");
       model.addAttribute(

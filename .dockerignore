@@ -1,0 +1,10 @@
+target/
+.idea/
+.vscode/
+*.iml
+.git/
+.cursor/
+node_modules/
+dist/
+*.md
+!README.md

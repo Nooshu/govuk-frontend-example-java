@@ -1,0 +1,22 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Step-by-step: docs/deploying-on-render.md
+#
+# Java is not a native Render runtime — use Docker so the image can include
+# Node (Sass / govuk-frontend) and a Temurin 25 JRE.
+# Sessions are in-memory (fine for a public example; not multi-instance durable).
+
+services:
+  - type: web
+    name: govuk-frontend-example-java
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /health
+    dockerfilePath: ./Dockerfile
+    envVars:
+      # Render often sets NODE_ENV=production; force demos on for the public blog example.
+      - key: DEMOS_ENABLED
+        value: "true"
+      - key: JAVA_OPTS
+        value: "-XX:MaxRAMPercentage=75.0"

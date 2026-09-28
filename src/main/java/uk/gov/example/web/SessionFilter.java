@@ -60,18 +60,22 @@ public class SessionFilter extends OncePerRequestFilter {
     request.setAttribute(ATTR_SESSION, session);
     request.setAttribute(ATTR_SESSION_ID, id);
 
+    // Set the session cookie before the controller writes the body. After the response is
+    // committed (chunked HTML), Tomcat ignores late Set-Cookie headers — which left browsers
+    // without a session and made CSRF checks fail on cookie-banner and form POSTs.
+    boolean secure = request.isSecure();
+    String cookieName = secure ? HOST_COOKIE_NAME : COOKIE_NAME;
+    response.addHeader(
+        "Set-Cookie",
+        policy.setCookie(
+            cookieName,
+            id,
+            new Policy.CookieOptions(null, secure, true, "/", MAX_AGE, secure)));
+    response.setHeader("X-Robots-Tag", "noindex, nofollow");
+
     filterChain.doFilter(request, response);
 
     store.put(id, session);
-    boolean secure = request.isSecure();
-    String name = secure ? HOST_COOKIE_NAME : COOKIE_NAME;
-    String header =
-        policy.setCookie(
-            name,
-            id,
-            new Policy.CookieOptions(null, secure, true, "/", MAX_AGE, secure));
-    response.addHeader("Set-Cookie", header);
-    response.setHeader("X-Robots-Tag", "noindex, nofollow");
   }
 
   private static String cookieValue(HttpServletRequest request, String name) {

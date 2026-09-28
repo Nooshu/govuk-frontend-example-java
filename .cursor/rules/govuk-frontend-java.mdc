@@ -1,0 +1,482 @@
+---
+description: Build a GOV.UK Frontend compatible server-rendered implementation using Java, Spring Boot, and Thymeleaf
+alwaysApply: true
+---
+
+# Project goal
+
+Build a server-rendered UK government service using Java, Spring Boot, and Thymeleaf that produces HTML compatible with GOV.UK Frontend.
+
+This project is part of an experiment demonstrating that GOV.UK Frontend does not require Nunjucks, Node.js, or a client-side frontend framework.
+
+The backend rendering technology is an implementation detail.
+
+The compatibility contract is the HTML expected by the official GOV.UK Frontend component fixtures for the exact GOV.UK Frontend version installed by this project.
+
+The objective is to achieve 100% fixture parity for every GOV.UK Frontend component implemented by this project.
+
+## Fundamental architecture
+
+The architecture is:
+
+```text
+GOV.UK Frontend fixture
+        |
+        v
+Java component options
+        |
+        v
+Thymeleaf fragment
+        |
+        v
+Server-rendered HTML
+        |
+        v
+DOM comparison
+        |
+        v
+Expected GOV.UK Frontend HTML
+```
+
+The application must server-render the complete core experience.
+
+JavaScript may progressively enhance the resulting HTML using the official GOV.UK Frontend JavaScript.
+
+Do not build a client-rendered application.
+
+## Technology stack
+
+Use:
+
+- a current supported LTS Java release
+- Spring Boot
+- Spring MVC
+- Thymeleaf
+- Maven
+- Maven Wrapper
+- JUnit 5
+- AssertJ
+- Jsoup
+- Jackson YAML or SnakeYAML
+
+Use current stable, supported releases unless the repository explicitly pins another version.
+
+Prefer established ecosystem dependencies over small convenience libraries.
+
+Keep dependencies to a sensible minimum.
+
+## GOV.UK Frontend
+
+Install and pin an explicit GOV.UK Frontend version.
+
+GOV.UK Frontend is authoritative for:
+
+- component behaviour
+- component options
+- expected HTML
+- CSS
+- JavaScript
+- fonts
+- images and other assets
+- accessibility-related markup
+- data attributes
+- ARIA attributes
+
+Do not reimplement GOV.UK Frontend CSS.
+
+Do not reimplement GOV.UK Frontend client-side JavaScript.
+
+Do not copy GOV.UK styles into application-specific stylesheets unless an application-specific extension genuinely requires it.
+
+## Component fixtures
+
+Use the official GOV.UK Frontend component fixtures belonging to the exact installed GOV.UK Frontend version.
+
+The fixtures are the compatibility contract.
+
+Before implementing a component:
+
+1. Inspect all upstream fixtures for that component.
+2. Inspect its expected HTML.
+3. Inspect the upstream Nunjucks macro when necessary to understand rendering behaviour.
+4. Design the Java component API from the complete behaviour, not from one example.
+5. Implement the component.
+6. Run every applicable fixture against it.
+
+The Nunjucks implementation may be studied as a behavioural reference.
+
+Nunjucks must not be required to render the Java implementation.
+
+## Component architecture
+
+Represent GOV.UK component options using strongly typed Java models.
+
+Prefer records for immutable option objects where appropriate.
+
+For example:
+
+```java
+public record ButtonOptions(
+    String text,
+    TrustedHtml html,
+    String type,
+    String classes,
+    Map<String, String> attributes
+) {}
+```
+
+Use enums where GOV.UK Frontend genuinely defines a constrained set of values.
+
+Do not create enums merely to avoid every string.
+
+Prefer simple, understandable APIs.
+
+Do not expose Thymeleaf implementation details through the public component API.
+
+A component must be renderable independently of a controller or HTTP request.
+
+Keep these concerns separate:
+
+- HTTP routing and controllers
+- application/domain logic
+- GOV.UK component models
+- component rendering
+- Thymeleaf templates
+- fixture loading
+- fixture mapping
+- HTML comparison
+- tests
+
+Do not put business logic into templates.
+
+## Suggested project structure
+
+Prefer a structure similar to:
+
+```text
+src/main/java/
+  uk/gov/example/
+    web/
+    govuk/
+      components/
+        button/
+        input/
+        textarea/
+        select/
+        radios/
+        checkboxes/
+        error/
+      html/
+
+src/main/resources/
+  templates/
+    govuk/
+      components/
+        button.html
+        input.html
+        textarea.html
+        select.html
+        radios.html
+        checkboxes.html
+        error-summary.html
+
+src/test/
+  java/
+    ...
+  resources/
+    fixtures/
+```
+
+Adapt package names to the application.
+
+Keep GOV.UK rendering code clearly separated from application code.
+
+## Thymeleaf
+
+Use Thymeleaf fragments for GOV.UK components.
+
+Templates must produce the minimum structure required by GOV.UK Frontend.
+
+Do not introduce arbitrary wrapper elements.
+
+Do not change element types merely because they are easier to implement.
+
+Preserve:
+
+- element ordering
+- class ordering where required by fixture compatibility
+- attributes
+- IDs
+- names
+- values
+- ARIA relationships
+- data attributes
+- error markup
+- hint markup
+- fieldset and legend relationships
+- conditional content
+- nested component structures
+
+Avoid complex application logic inside Thymeleaf expressions.
+
+Move complex rendering decisions into the Java component layer when appropriate.
+
+## HTML escaping and security
+
+Plain text must be escaped by default.
+
+A GOV.UK Frontend option named `text` represents text and must not allow arbitrary HTML injection.
+
+Options corresponding to GOV.UK Frontend `html` properties require an explicit trusted HTML representation.
+
+Create a small explicit abstraction such as `TrustedHtml` if required.
+
+Do not represent trusted HTML as an ordinary String when doing so makes accidental unsafe rendering easy.
+
+Never treat arbitrary user-controlled data as trusted HTML.
+
+Do not globally disable Thymeleaf escaping.
+
+Do not use unescaped output simply to make a fixture pass without understanding why the fixture expects HTML.
+
+## Attributes
+
+Support GOV.UK Frontend's arbitrary attributes option where components expose it.
+
+Attributes must be rendered correctly and safely.
+
+Do not create unsafe attribute strings through concatenation.
+
+Pay particular attention to:
+
+- `id`
+- `name`
+- `value`
+- `type`
+- `role`
+- `aria-*`
+- `data-*`
+- `disabled`
+- `checked`
+- `selected`
+- `autocomplete`
+
+Boolean HTML attributes must follow valid HTML semantics.
+
+## Fixture test architecture
+
+Fixture testing must be data-driven.
+
+For each fixture:
+
+1. Load the upstream fixture data.
+2. Identify the component and fixture.
+3. Deserialize its options.
+4. Map those options into the Java component model.
+5. Render using the Java/Thymeleaf implementation.
+6. Obtain the expected GOV.UK Frontend HTML.
+7. Parse actual HTML.
+8. Parse expected HTML.
+9. Compare them.
+10. Produce a useful diff when they differ.
+
+A new upstream fixture should normally be testable without creating a new Java test method.
+
+## HTML comparison
+
+Use Jsoup to parse HTML.
+
+Do not rely exclusively on naive raw string equality because template engines can produce semantically irrelevant whitespace differences.
+
+However, normalisation must be conservative.
+
+It may normalise genuinely insignificant differences such as formatting whitespace where HTML semantics are unchanged.
+
+It must not hide differences involving:
+
+- missing elements
+- additional elements
+- element types
+- element ordering
+- text
+- attributes
+- attribute values
+- class names
+- IDs
+- names
+- values
+- ARIA attributes
+- data attributes
+- form semantics
+- accessibility relationships
+
+Document every normalisation rule.
+
+Every non-trivial normalisation rule must have tests demonstrating both:
+
+1. the irrelevant difference it intentionally ignores
+2. meaningful differences it still detects
+
+When a fixture test fails, assume the implementation is wrong before assuming the comparator is wrong.
+
+Do not weaken comparison rules simply to increase the fixture pass rate.
+
+## Testing
+
+Use JUnit 5 and AssertJ.
+
+Tests must cover:
+
+- all supported official fixtures
+- default options
+- optional options
+- text escaping
+- trusted HTML
+- custom classes
+- custom attributes
+- IDs
+- ARIA
+- data attributes
+- errors
+- hints
+- nested content
+- form values
+- checked states
+- selected states
+- disabled states
+- complex components
+
+Use parameterised tests for fixture suites.
+
+Test the fixture infrastructure itself.
+
+## Forbidden shortcuts
+
+Never:
+
+- modify an upstream fixture to make a test pass
+- modify expected HTML to match the implementation
+- special-case an individual fixture by fixture name
+- hard-code fixture output
+- copy pre-rendered fixture HTML into a component
+- weaken the comparator to hide a real difference
+- invoke Nunjucks at application runtime
+- invoke Node.js to generate production component HTML
+- call another GOV.UK implementation at runtime
+- use React, Vue, Angular, Svelte, or another client-side framework to construct core GOV.UK component markup
+- replace GOV.UK Frontend CSS
+- replace GOV.UK Frontend JavaScript behaviour unnecessarily
+
+If a fixture cannot be implemented correctly, leave the test failing and document the problem rather than cheating the compatibility test.
+
+## Progressive enhancement
+
+The initial HTTP response must contain the complete core content and controls required for the journey.
+
+Use official GOV.UK Frontend JavaScript to progressively enhance components that require JavaScript behaviour.
+
+The Java implementation is responsible for producing the correct initial HTML.
+
+Do not use JavaScript to repair incorrectly rendered server-side markup.
+
+## Assets
+
+Use the official GOV.UK Frontend package as the source of:
+
+- CSS
+- JavaScript
+- fonts
+- images
+- other distributed assets
+
+Provide a reproducible mechanism for obtaining/building those assets.
+
+Pin the GOV.UK Frontend version.
+
+Do not silently load a different version from a CDN.
+
+## Dependency management
+
+Use Maven.
+
+Commit the Maven Wrapper.
+
+Pin important dependencies through normal Maven dependency management.
+
+Avoid unnecessary dependencies.
+
+Run dependency and vulnerability checks where practical.
+
+## Code quality
+
+Prefer:
+
+- immutable data
+- records
+- clear types
+- small focused classes
+- constructor injection
+- composition
+- simple Thymeleaf templates
+- explicit behaviour
+
+Avoid:
+
+- static mutable state
+- HTML StringBuilder rendering
+- reflection-heavy abstractions
+- unnecessary inheritance
+- excessive generic abstractions
+- application logic in templates
+- unnecessary JavaScript
+- architecture copied directly from TypeScript
+
+Use appropriate Java formatting and static analysis.
+
+Treat compiler and analysis warnings seriously.
+
+## CI
+
+CI must at minimum:
+
+1. compile the application
+2. run formatting/static checks
+3. run unit tests
+4. run all GOV.UK fixture parity tests
+
+A fixture parity failure must fail CI.
+
+## GOV.UK Frontend upgrades
+
+Treat upgrading GOV.UK Frontend as a compatibility event.
+
+When upgrading:
+
+1. update the pinned GOV.UK Frontend version
+2. obtain the fixtures belonging to that version
+3. run the existing implementation against the new fixtures
+4. inspect failures
+5. update Java rendering code where GOV.UK behaviour has legitimately changed
+6. rerun the complete suite
+
+Do not modify new fixtures to preserve old behaviour.
+
+Fixture failures are useful because they identify compatibility changes.
+
+## Definition of done
+
+A GOV.UK component is complete only when:
+
+- it is rendered by Java and Thymeleaf
+- it has no Nunjucks rendering dependency
+- it has no Node.js runtime rendering dependency
+- it uses official GOV.UK Frontend assets
+- every supported upstream fixture passes
+- escaping is tested
+- trusted HTML behaviour is tested
+- accessibility-related markup matches expected output
+- fixture comparison has not been weakened
+- no fixture-specific hacks exist
+- CI passes
+
+The primary success metric is fixture parity, not visual similarity.

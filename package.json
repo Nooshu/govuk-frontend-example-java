@@ -2,7 +2,7 @@
   "name": "govuk-frontend-example",
   "version": "0.0.0",
   "private": true,
-  "description": "Base template for GDS-compliant frontends using GOV.UK Frontend (wrapper language TBD). Shared Sass pipeline, performance/security baseline, and Node tooling for docs hygiene.",
+  "description": "Java / Spring Boot / Thymeleaf specialised line for GDS-compliant frontends using GOV.UK Frontend. Shared Sass pipeline, performance/security baseline, and Node tooling for docs hygiene.",
   "type": "module",
   "engines": {
     "node": ">=22"

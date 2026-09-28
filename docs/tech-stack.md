@@ -1,98 +1,79 @@
 # Tech stack
 
-**Status: TBD** (implementation language)
-
-The _example implementation_ language and its 2026 best-practice templating / component approach are not chosen yet. This file is the **single place** to record them when decided.
+**Status: Java** — this is the Java specialised line of [govuk-frontend-example](https://github.com/Nooshu/govuk-frontend-example).
 
 ## Two layers
 
-| Layer                          | Stack                                                                                               | Notes                                                                                                                                      |
-| ------------------------------ | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **GOV.UK Frontend (upstream)** | **Node** package (`govuk-frontend`), **Nunjucks** macros (`template.njk`), official `fixtures.json` | Fixed by GDS. Always name Node/Nunjucks when discussing install, fixtures, macro options, escape behaviour, and verifying stored fixtures. |
-| **This template (wrapper)**    | TBD — e.g. TypeScript, Go, Python                                                                   | Server-side HTML tracking Frontend macros/`template.njk` (Nunjucks in-process only when Node-adjacent). **No** React/Vue/Angular/Svelte.   |
+| Layer                          | Stack                                                                                               | Notes                                                                                                                                                                                                  |
+| ------------------------------ | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **GOV.UK Frontend (upstream)** | **Node** package (`govuk-frontend`), **Nunjucks** macros (`template.njk`), official `fixtures.json` | Fixed by GDS. Node is for install, fixtures, Sass, and optional freshness checks — **not** for request-time HTML in this line.                                                                         |
+| **This line (wrapper)**        | **Java 25** LTS, **Spring Boot 4.1**, Spring MVC, **Thymeleaf**, Maven                              | Server-side HTML generated **natively in Java**. Component HTML tracks Frontend macros/`template.njk` and proves **backend ≡ every fixture**. Page shells and journey pages use Thymeleaf. No SPA UIs. |
 
-## Rule for agents and humans
+## Why this shape
 
-Until an implementation language is recorded here: do not invent wrapper-specific paths, package managers, or framework idioms.
+| Concern                  | Choice                                                                                                                                                                                                                                       | Avoid                                                                                 |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| HTTP / routing           | Spring Boot Web (MVC)                                                                                                                                                                                                                        | Client-side routers                                                                   |
+| Page documents           | Thymeleaf layouts / fragments                                                                                                                                                                                                                | Hand-pasted full pages; React/Vue/etc.                                                |
+| GOV.UK component HTML    | Java renderers in `uk.gov.example.govuk` (StringBuilder ports of `template.njk`)                                                                                                                                                             | Request-time Nunjucks/Node; incomplete third-party wrappers                           |
+| Trusted HTML             | Explicit `TrustedHtml` (never a bare `String` for `html` options)                                                                                                                                                                            | Unescaped user input                                                                  |
+| Text escaping            | Nunjucks-aligned escaper (`&#39;`, `&#92;`, …)                                                                                                                                                                                               | Only `StringEscapeUtils` / default HTML escaper for fixture text                      |
+| Fixtures                 | Jackson + ordered `Params`; load from `node_modules/govuk-frontend/.../fixtures.json`                                                                                                                                                        | Editing fixture `html`; copying fixtures into `src/test/resources` as source of truth |
+| Parity gate              | Every fixture: Java `Render` output ≡ fixture `html` (trim outer whitespace only)                                                                                                                                                            | Weakening comparison to chase a pass rate                                             |
+| Styles                   | Sass pipeline: `styles/application.scss` → Frontend `@use` → `govuk-overrides.scss` last                                                                                                                                                     | Serving prebuilt `govuk-frontend.min.css`; `!important` in service CSS                |
+| Security / cache headers | Java port in [`uk.gov.example.baseline`](../src/main/java/uk/gov/example/baseline/) of [`baseline/policy.json`](../baseline/policy.json); wire via [`BaselineHeadersFilter`](../src/main/java/uk/gov/example/web/BaselineHeadersFilter.java) | Ad-hoc header middleware that drifts from the Node oracle                             |
+| Compression              | Brotli (`br`) when advertised; Gzip only as fallback                                                                                                                                                                                         | Gzip-only                                                                             |
+| Tests                    | JUnit 5, AssertJ, Jsoup (optional DOM helpers); JaCoCo **100%** on application packages (not `govuk`)                                                                                                                                        | Skipping fixture suites                                                               |
 
-Once recorded: **every** feature request and code change must follow **that language’s latest best practices** for project layout, typing, modules, testing, packaging, and CI — while honouring Frontend’s fixture contract in [`AGENTS.md`](../AGENTS.md). Prefer current stable idioms for the recorded major version over outdated tutorials.
-
-**HTML generation follows the wrapper language:**
-
-- **Node-adjacent stacks** (TypeScript on Node): calling Frontend’s **Nunjucks macros** in-process is fine — that is why the TypeScript line does it.
-- **Other languages** (Go, Python, …): generate component and page HTML **natively** in that language. Do **not** shell out to Node/Nunjucks for request-time rendering. Use the pinned package’s `template.njk` / macros as the behaviour reference, and prove **backend ≡ every fixture `html`**. Optional Node Nunjucks checks only prove fixtures are fresh.
-
-Still do **not** maintain hand-copied HTML dumps from each release as the long-term source.
-
-Shared Node tooling in this repo (Sass pipeline, `baseline/`, docs scripts) already uses current ESM / Node 22+ practice; keep it that way.
-
-Document stack decisions and “how we write X here” notes in this file when the language is chosen, so humans and agents share one source of truth.
-
-## Consistency tooling (today)
-
-While the wrapper language is TBD, Node tooling keeps docs and shared config consistent:
+## Commands
 
 ```sh
-npm install
-npm test          # baseline/ headers and cache policy; Sass pipeline
-npm run build:styles
-npm run verify    # docs + build:styles + tests
+# Node 22+ (Frontend pin, Sass, shared baseline/docs tests)
+npm ci
+npm run build:styles          # styles/ → dist/stylesheets/application.css
+npm test                      # baseline + Sass tests at 100% coverage
+npm run verify:docs
+
+# Java 25 + Maven Wrapper
+./mvnw verify                 # unit + fixture parity + JaCoCo gate
+./mvnw spring-boot:run        # listens on PORT (default 8080); bind all interfaces
+
+# Full local verify (docs + Sass + Java)
+npm run verify && ./mvnw verify
 ```
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md). Dotfiles: `.editorconfig`, `.prettierrc.json`, `.markdownlint-cli2.jsonc`, `.nvmrc`, `.vscode/`, `.cursor/rules/`, `.github/`. Record language-specific formatters in this file when chosen.
+| Item                            | Value                                                                                                           |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Implementation language         | Java 25 LTS                                                                                                     |
+| Framework                       | Spring Boot 4.1.x, Spring MVC, Thymeleaf                                                                        |
+| Build                           | Maven + Maven Wrapper                                                                                           |
+| Templating / component approach | Thymeleaf for page shells; native Java component renderers with fixture parity                                  |
+| `govuk-frontend` (Node)         | `6.5.1` — check [latest release](https://github.com/alphagov/govuk-frontend/releases/latest) before upgrades    |
+| Sass pipeline                   | `styles/application.scss` → `npm run build:styles` → `dist/stylesheets/application.css`                         |
+| Overrides                       | [`styles/govuk-overrides.scss`](../styles/govuk-overrides.scss) last; cascade/specificity only; no `!important` |
+| Page template reference         | https://design-system.service.gov.uk/styles/page-template/                                                      |
+| Fixture testing guide           | https://frontend.design-system.service.gov.uk/testing-your-html/                                                |
+| Preview                         | `/components` catalogue; `/components/:name?fixture=` previews (gated by `DEMOS_ENABLED` in production)         |
+| Deploy                          | Docker on Render — see [deploying-on-render.md](deploying-on-render.md)                                         |
 
-## Shared baseline (language-agnostic)
+## Environment
 
-[`baseline/`](../baseline/) is part of this template’s contract. Language lines sync that directory with this repo.
+| Variable        | Default / behaviour                                                     |
+| --------------- | ----------------------------------------------------------------------- |
+| `PORT`          | `8080` locally; Render injects                                          |
+| `DEMOS_ENABLED` | unset/false hides catalogue in production; Render Blueprint sets `true` |
+| `NODE_ENV`      | `production` implies demos off unless `DEMOS_ENABLED` overrides         |
 
-| Piece                                             | Role                                                                                               |
-| ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| [`baseline/policy.json`](../baseline/policy.json) | OWASP header values, CSP directives, cache kinds, performance budgets                              |
-| [`baseline/index.mjs`](../baseline/index.mjs)     | Node helpers: `buildResponseHeaders`, `applyResponseHeaders`, `buildSetCookie`, preload and `ETag` |
-| [`styles/`](../styles/)                           | Sass entry compiling Frontend via `@use`, then `govuk-overrides.scss` ([styles.md](styles.md))     |
-
-Node and TypeScript services call the helpers. Other languages implement the same `kind` values and header map, and test against the Node output. Production HTTPS passes `secureTransport: true`. Details: [frontend-performance.md](frontend-performance.md), [frontend-security.md](frontend-security.md).
-
-Expect a **Node** dependency for installing `govuk-frontend`, compiling Sass, running shared baseline/docs tests, and (optionally) a Nunjucks freshness check — even when the wrapper is another language. That does **not** mean the Go/Python/… server should call Node to render HTML.
-
-## When implementation language is confirmed, document
-
-- Language, runtime, and version policy
-- Templating approach: Nunjucks macros when the wrapper is Node-adjacent; otherwise native HTML generation in the wrapper language, with fixture parity documented
-- Package manager, lockfile, and how dependencies are pinned (including `govuk-frontend` via npm/Node)
-- How Frontend CSS/JS (and fonts) are installed and served: Sass compile of `styles/application.scss`, fingerprinted URL, `buildResponseHeaders` as `fingerprinted-asset`
-- How every HTTP response applies [`baseline/`](../baseline/) (`secureTransport: true` in production)
-- Shared HTML escape + attribute helpers matching **Nunjucks `escape`** when not invoking Nunjucks directly (see [creating-components.md](creating-components.md))
-- Fixture loader and preview / raw-fixture route conventions (extensive parity coverage)
-- Layout chrome helpers (skip link, header, service navigation, footer)
-- Test runner commands, **backend parity suite** over **all** fixtures (primary), **100%** coverage gate (functions / branches / statements), and **Nunjucks fixture-verification** scripts (Node, secondary)
-- Upgrade entrypoint — always review https://github.com/alphagov/govuk-frontend/releases/latest first; see [upgrading-govuk-frontend.md](upgrading-govuk-frontend.md)
-- Confirmation that no frontend UI framework is in the dependency tree for rendering
-
-## Hard constraints (always)
+## Hard constraints
 
 - GOV.UK Frontend pins a single version; CSS/JS and fixtures must match.
-- Prefer **Nunjucks macros** for component HTML; do not maintain copy-pasted HTML from each release.
-- Component options mirror Nunjucks macro options (`macro-options.json` / fixture `options`).
-- Backend output must pass extensive **100% HTML fixture parity** (byte-for-byte vs official fixture `html` for every fixture). Nunjucks-vs-fixture checks prove freshness only; they do not replace backend parity.
+- Request-time HTML must be native Java — do **not** shell out to Node/Nunjucks.
+- Backend output must pass **every** official fixture `html` for every shipped component.
 - Compile CSS via Sass ([styles.md](styles.md)); `govuk-overrides.scss` last; never `!important` in service CSS.
-- Patterns compose components; they are not new low-level components.
-- Wrapper structure/tooling follow the **chosen language’s best practices**; Frontend tooling stays Node/Nunjucks.
-- No frontend UI frameworks for GOV.UK chrome — see [project-purpose.md](project-purpose.md).
-- Coverage: **100%** functions, branches, statements — see [testing-components.md](testing-components.md).
+- No frontend UI frameworks for GOV.UK chrome.
+- Coverage: **100%** instructions / branches / complexity for application packages under JaCoCo (`Application` and `uk.gov.example.govuk` excluded — govuk renderers are gated by the fixture parity suite, not line coverage).
 - Before every Frontend upgrade: https://github.com/alphagov/govuk-frontend/releases/latest
 
-See [`AGENTS.md`](../AGENTS.md), [guidance-sources.md](guidance-sources.md), and [creating-components.md](creating-components.md).
+**Coverage split:** `uk.gov.example.govuk` component HTML is proven by [`RenderFixtureParityTest`](../src/test/java/uk/gov/example/govuk/RenderFixtureParityTest.java) (backend ≡ every official fixture `html`). JaCoCo’s 100% gate applies to the rest of the application packages (`web`, `service`, `baseline`, `session`, `config`).
 
-## Placeholder version pin
-
-| Item                              | Value                                                                                                        |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Implementation language           | _TBD_                                                                                                        |
-| Templating / component approach   | _TBD — Nunjucks when Node-adjacent; native HTML elsewhere; always fixture-parity_                            |
-| `govuk-frontend` (Node)           | `6.5.1` — check [latest release](https://github.com/alphagov/govuk-frontend/releases/latest) before upgrades |
-| Sass pipeline                     | `styles/application.scss` → `npm run build:styles` → `dist/stylesheets/application.css`                      |
-| Nunjucks fixture verification     | _TBD — Node scripts under tests/_                                                                            |
-| Page template reference           | https://design-system.service.gov.uk/styles/page-template/                                                   |
-| Fixture testing guide             | https://frontend.design-system.service.gov.uk/testing-your-html/                                             |
-| Upgrade / test / preview commands | _TBD — list here when wired_                                                                                 |
+See [`AGENTS.md`](../AGENTS.md) and [`.cursor/rules/govuk-frontend-java.mdc`](../.cursor/rules/govuk-frontend-java.mdc).

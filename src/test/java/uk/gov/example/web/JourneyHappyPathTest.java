@@ -32,18 +32,16 @@ class JourneyHappyPathTest {
   @Autowired private MockMvc mockMvc;
 
   @Test
-  void startThroughConfirmationSkippingOptional() throws Exception {
+  void startThroughConfirmation() throws Exception {
     MvcResult start = mockMvc.perform(get("/")).andExpect(status().isOk()).andReturn();
     Cookie sessionCookie = sessionCookie(start.getResponse());
     assertThat(start.getResponse().getContentAsString())
-        .contains("This is a live demo. It is not a real government service.");
+        .contains("This is a live demo. It is not a real government service.")
+        .contains("Apply for a fishing rod licence")
+        .contains("href=\"/licence-length\"");
 
-    mockMvc
-        .perform(get("/task-list").cookie(sessionCookie))
-        .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Your application")));
-
-    postStep(sessionCookie, "/name", "first-name", "Jane", "last-name", "Doe");
+    postStep(sessionCookie, "/licence-length", "licence-length", "1-day");
+    postStep(sessionCookie, "/name", "full-name", "Jane Doe");
     postStep(
         sessionCookie,
         "/date-of-birth",
@@ -53,35 +51,15 @@ class JourneyHappyPathTest {
         "1",
         "date-of-birth-year",
         "2000");
+    postStep(sessionCookie, "/where-you-will-fish", "country", "England");
     postStep(sessionCookie, "/email", "email", "jane@example.com");
-    postStep(sessionCookie, "/contact-preference", "contact-by", "email");
-    postStep(sessionCookie, "/where-you-will-fish", "regions", "north-west");
-    postStep(sessionCookie, "/licence-length", "licence-length", "1-day");
-    postStep(sessionCookie, "/start-month", "start-month", currentStartMonth());
-    postStep(
-        sessionCookie,
-        "/address",
-        "address-line-1",
-        "1 High Street",
-        "town",
-        "London",
-        "postcode",
-        "SW1A 1AA");
-    postStep(sessionCookie, "/evidence");
-    postStep(sessionCookie, "/additional-details", "additional-details", "");
-    postStep(
-        sessionCookie,
-        "/create-a-password",
-        "password",
-        "password1",
-        "password-confirm",
-        "password1");
 
     String csrf =
         csrf(
             mockMvc
                 .perform(get("/check-answers").cookie(sessionCookie))
                 .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Accept and continue")))
                 .andReturn());
     mockMvc
         .perform(
@@ -96,7 +74,13 @@ class JourneyHappyPathTest {
         .perform(get("/confirmation").cookie(sessionCookie))
         .andExpect(status().isOk())
         .andExpect(content().string(org.hamcrest.Matchers.containsString("Application complete")))
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("RL")));
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("FR")))
+        .andExpect(
+            content()
+                .string(
+                    org.hamcrest.Matchers.containsString(
+                        "Nobody will send you a fishing rod licence")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/components\"")));
   }
 
   private void postStep(Cookie sessionCookie, String path, String... fields) throws Exception {
@@ -135,10 +119,5 @@ class JourneyHappyPathTest {
     Cookie cookie = response.getCookie(SessionFilter.COOKIE_NAME);
     assertThat(cookie).isNotNull();
     return cookie;
-  }
-
-  private static String currentStartMonth() {
-    java.time.LocalDate now = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
-    return String.format("%04d-%02d", now.getYear(), now.getMonthValue());
   }
 }

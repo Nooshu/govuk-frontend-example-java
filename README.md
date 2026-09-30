@@ -6,7 +6,7 @@
 
 ## What you get
 
-- **Apply for a rod fishing licence** — demo journey from start to confirmation ([`docs/example-service.md`](docs/example-service.md))
+- **Apply for a fishing rod licence** — demo journey from start to confirmation ([`docs/example-service.md`](docs/example-service.md))
 - **Component catalogue** at `/components` — every Frontend 6.5.1 component with all fixture variations ([`docs/preview-server.md`](docs/preview-server.md))
 - **Render.com** Docker Blueprint for a public blog demo ([`docs/deploying-on-render.md`](docs/deploying-on-render.md))
 

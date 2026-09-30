@@ -2,7 +2,6 @@ package uk.gov.example.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -41,8 +39,7 @@ class JourneyCoverageTest {
                 .cookie(session)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("csrf", "bad")
-                .param("first-name", "Jane")
-                .param("last-name", "Doe"))
+                .param("full-name", "Jane Doe"))
         .andExpect(redirectedUrl("/session-expired"));
 
     mockMvc.perform(get("/session-expired").cookie(session)).andExpect(status().isOk());
@@ -54,8 +51,7 @@ class JourneyCoverageTest {
                 .cookie(session)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("csrf", csrf)
-                .param("first-name", "")
-                .param("last-name", ""))
+                .param("full-name", ""))
         .andExpect(redirectedUrl("/name"));
     mockMvc
         .perform(get("/name").cookie(session))
@@ -64,15 +60,18 @@ class JourneyCoverageTest {
 
     completeRequired(session);
 
-    csrf = csrf(mockMvc.perform(get("/name").param("return", "check-answers").cookie(session)).andReturn());
+    csrf =
+        csrf(
+            mockMvc
+                .perform(get("/name").param("return", "check-answers").cookie(session))
+                .andReturn());
     mockMvc
         .perform(
             post("/name")
                 .cookie(session)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("csrf", csrf)
-                .param("first-name", "")
-                .param("last-name", "Doe")
+                .param("full-name", "A")
                 .param("returnTo", "check-answers"))
         .andExpect(redirectedUrl("/name?return=check-answers"));
 
@@ -83,37 +82,23 @@ class JourneyCoverageTest {
                 .cookie(session)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("csrf", csrf)
-                .param("first-name", "Jane")
-                .param("last-name", "Doe")
+                .param("full-name", "Jane Doe")
                 .param("returnTo", "check-answers"))
         .andExpect(redirectedUrl("/check-answers"));
   }
 
   @Test
-  void evidenceUploadCheckAnswersGuardsAndConfirmation() throws Exception {
+  void checkAnswersGuardsAndConfirmation() throws Exception {
     Cookie session = sessionCookie(mockMvc.perform(get("/")).andReturn());
 
-    mockMvc.perform(get("/check-answers").cookie(session)).andExpect(redirectedUrl("/name"));
-    mockMvc.perform(get("/confirmation").cookie(session)).andExpect(redirectedUrl("/task-list"));
+    mockMvc
+        .perform(get("/check-answers").cookie(session))
+        .andExpect(redirectedUrl("/licence-length"));
+    mockMvc.perform(get("/confirmation").cookie(session)).andExpect(redirectedUrl("/"));
 
     completeRequired(session);
 
-    String csrf = csrf(mockMvc.perform(get("/evidence").cookie(session)).andReturn());
-    MockMultipartFile file =
-        new MockMultipartFile("evidence", "proof.pdf", "application/pdf", "pdf".getBytes());
-    mockMvc
-        .perform(
-            multipart("/evidence")
-                .file(file)
-                .cookie(session)
-                .param("csrf", csrf))
-        .andExpect(status().is3xxRedirection());
-    mockMvc
-        .perform(get("/evidence").cookie(session))
-        .andExpect(status().isOk())
-        .andExpect(content().string(org.hamcrest.Matchers.containsString("Current file")));
-
-    csrf = csrf(mockMvc.perform(get("/check-answers").cookie(session)).andReturn());
+    String csrf = csrf(mockMvc.perform(get("/check-answers").cookie(session)).andReturn());
     mockMvc
         .perform(
             post("/check-answers")
@@ -139,38 +124,33 @@ class JourneyCoverageTest {
                 .param("csrf", csrf))
         .andExpect(redirectedUrl("/confirmation"));
     mockMvc.perform(get("/confirmation").cookie(session)).andExpect(status().isOk());
-    mockMvc.perform(get("/task-list").cookie(session)).andExpect(status().isOk());
   }
 
   @Test
   void incompleteCheckAnswersPostRedirects() throws Exception {
     Cookie session = sessionCookie(mockMvc.perform(get("/")).andReturn());
-    String csrf =
-        csrf(mockMvc.perform(get("/name").cookie(session)).andReturn());
+    String csrf = csrf(mockMvc.perform(get("/licence-length").cookie(session)).andReturn());
     mockMvc
         .perform(
-            post("/name")
+            post("/licence-length")
                 .cookie(session)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("csrf", csrf)
-                .param("first-name", "Jane")
-                .param("last-name", "Doe"))
+                .param("licence-length", "1-day"))
         .andExpect(status().is3xxRedirection());
-    csrf = "unused";
-    // Force a CSRF from a page that exists; check-answers GET will redirect before form.
-    // Submit check-answers with a valid session CSRF after rotating via another GET.
-    csrf = csrf(mockMvc.perform(get("/email").cookie(session)).andReturn());
+    csrf = csrf(mockMvc.perform(get("/name").cookie(session)).andReturn());
     mockMvc
         .perform(
             post("/check-answers")
                 .cookie(session)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .param("csrf", csrf))
-        .andExpect(redirectedUrl("/date-of-birth"));
+        .andExpect(redirectedUrl("/name"));
   }
 
   private void completeRequired(Cookie session) throws Exception {
-    postStep(session, "/name", "first-name", "Jane", "last-name", "Doe");
+    postStep(session, "/licence-length", "licence-length", "1-day");
+    postStep(session, "/name", "full-name", "Jane Doe");
     postStep(
         session,
         "/date-of-birth",
@@ -180,29 +160,8 @@ class JourneyCoverageTest {
         "1",
         "date-of-birth-year",
         "2000");
+    postStep(session, "/where-you-will-fish", "country", "England");
     postStep(session, "/email", "email", "jane@example.com");
-    postStep(session, "/contact-preference", "contact-by", "email");
-    postStep(session, "/where-you-will-fish", "regions", "north-west");
-    postStep(session, "/licence-length", "licence-length", "1-day");
-    postStep(session, "/start-month", "start-month", currentStartMonth());
-    postStep(
-        session,
-        "/address",
-        "address-line-1",
-        "1 High Street",
-        "town",
-        "London",
-        "postcode",
-        "SW1A 1AA");
-    postStep(session, "/evidence");
-    postStep(session, "/additional-details", "additional-details", "");
-    postStep(
-        session,
-        "/create-a-password",
-        "password",
-        "password1",
-        "password-confirm",
-        "password1");
   }
 
   private void postStep(Cookie session, String path, String... fields) throws Exception {
@@ -228,10 +187,5 @@ class JourneyCoverageTest {
     Cookie cookie = result.getResponse().getCookie(SessionFilter.COOKIE_NAME);
     assertThat(cookie).isNotNull();
     return cookie;
-  }
-
-  private static String currentStartMonth() {
-    java.time.LocalDate now = java.time.LocalDate.now(java.time.ZoneOffset.UTC);
-    return String.format("%04d-%02d", now.getYear(), now.getMonthValue());
   }
 }

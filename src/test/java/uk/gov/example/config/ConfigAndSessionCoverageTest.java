@@ -44,6 +44,6 @@ class ConfigAndSessionCoverageTest {
     assertThat(session.takeFlashErrors("/name")).isEmpty();
     session.setNotice("/cookies", null);
     assertThat(session.takeNotice("/cookies")).isNull();
-    assertThat(SessionData.referenceFor(null)).isEqualTo("RL");
+    assertThat(SessionData.referenceFor(null)).isEqualTo("FR00000000");
   }
 }

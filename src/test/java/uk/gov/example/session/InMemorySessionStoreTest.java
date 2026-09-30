@@ -16,9 +16,9 @@ class InMemorySessionStoreTest {
     assertThat(store.get(id).orElseThrow().csrfToken()).isNotBlank();
 
     SessionData data = new SessionData();
-    data.application().setFirstName("Jane");
+    data.application().setFullName("Jane Doe");
     store.put(id, data);
-    assertThat(store.get(id).orElseThrow().application().firstName()).isEqualTo("Jane");
+    assertThat(store.get(id).orElseThrow().application().fullName()).isEqualTo("Jane Doe");
 
     store.remove(id);
     assertThat(store.get(id)).isEmpty();
@@ -27,7 +27,7 @@ class InMemorySessionStoreTest {
   @Test
   void sessionDataDefaults() {
     SessionData empty = new SessionData();
-    assertThat(empty.application().firstName()).isEmpty();
+    assertThat(empty.application().fullName()).isEmpty();
     assertThat(empty.cookieAnalytics()).isNull();
     assertThat(empty.cookieBannerDismissed()).isFalse();
     empty.rotateCsrf();

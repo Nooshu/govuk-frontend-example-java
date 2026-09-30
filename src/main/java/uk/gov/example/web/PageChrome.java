@@ -40,7 +40,7 @@ public class PageChrome {
       String mainClasses) {
     boolean welsh = "cy".equals(lang);
     String serviceName =
-        welsh ? "Gwneud cais am drwydded bysgota" : "Apply for a rod fishing licence";
+        welsh ? "Gwneud cais am drwydded bysgota" : "Apply for a fishing rod licence";
     String pageTitle = (hasErrors ? "Error: " : "") + heading + " – " + serviceName;
     String homepageUrl = welsh ? "/cy" : "/";
     String skipLinkText = welsh ? "Neidio i'r prif gynnwys" : "Skip to main content";
@@ -197,7 +197,7 @@ public class PageChrome {
         List.of(
             Params.of(
                 "headingText",
-                "Cookies on Apply for a rod fishing licence",
+                "Cookies on Apply for a fishing rod licence",
                 "text",
                 "We use analytics cookies to understand how you use this example service. This example does not set analytics cookies.",
                 "actions",

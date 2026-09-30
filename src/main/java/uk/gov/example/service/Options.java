@@ -1,80 +1,44 @@
 package uk.gov.example.service;
 
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-/** Static option lists (regions, licence lengths, months). */
+/** Static option lists (countries, licence lengths, fees). */
 public final class Options {
-
-  /** Checkbox value for an applicant who has not decided where they will fish. */
-  public static final String NOT_SURE = "not-sure";
 
   public record Option(String value, String text) {}
 
-  public record LicenceOption(String value, String text, String fee) {}
+  public record FeeRow(String text, String fee) {}
 
-  private static final List<Option> REGIONS =
+  private static final List<Option> COUNTRIES =
       List.of(
-          new Option("north-west", "North West"),
-          new Option("north-east", "North East"),
-          new Option("midlands", "Midlands"),
-          new Option("south-west", "South West"),
-          new Option("south-east", "South East"),
-          new Option("wales", "Wales"));
+          new Option("England", "England"),
+          new Option("Wales", "Wales"),
+          new Option("Scotland", "Scotland"));
 
-  private static final List<LicenceOption> LICENCE_LENGTHS =
+  private static final List<Option> LICENCE_LENGTHS =
       List.of(
-          new LicenceOption(LicenceApplication.LICENCE_ONE_DAY, "1 day", "£7.10"),
-          new LicenceOption(LicenceApplication.LICENCE_EIGHT_DAY, "8 days", "£14.20"),
-          new LicenceOption(LicenceApplication.LICENCE_TWELVE_MTH, "12 months", "£36.80"));
+          new Option(LicenceApplication.LICENCE_ONE_DAY, "1 day"),
+          new Option(LicenceApplication.LICENCE_EIGHT_DAYS, "8 days"),
+          new Option(LicenceApplication.LICENCE_TWELVE_MONTHS, "12 months"));
 
-  private static final List<Option> CONTACT_OPTIONS =
+  private static final List<FeeRow> LICENCE_FEES =
       List.of(
-          new Option(LicenceApplication.CONTACT_BY_EMAIL, "Email"),
-          new Option(LicenceApplication.CONTACT_BY_TELEPHONE, "Telephone"));
-
-  private static final DateTimeFormatter MONTH_LABEL =
-      DateTimeFormatter.ofPattern("MMMM yyyy", Locale.UK);
+          new FeeRow("1 day", "£7.10"),
+          new FeeRow("8 days", "£14.20"),
+          new FeeRow("12 months", "£36.80"));
 
   private Options() {}
 
-  public static List<Option> regions() {
-    return REGIONS;
+  public static List<Option> countries() {
+    return COUNTRIES;
   }
 
-  public static List<LicenceOption> licenceLengths() {
+  public static List<Option> licenceLengths() {
     return LICENCE_LENGTHS;
   }
 
-  public static List<Option> contactOptions() {
-    return CONTACT_OPTIONS;
-  }
-
-  public static List<Option> licenceLengthOptions() {
-    List<Option> options = new ArrayList<>(LICENCE_LENGTHS.size());
-    for (LicenceOption length : LICENCE_LENGTHS) {
-      options.add(new Option(length.value(), length.text()));
-    }
-    return options;
-  }
-
-  /** Next 12 months the licence can start, counting from the month {@code now} falls in (UTC). */
-  public static List<Option> startMonths(LocalDate now) {
-    YearMonth start = YearMonth.from(now.atStartOfDay(ZoneOffset.UTC).toLocalDate());
-    List<Option> months = new ArrayList<>(12);
-    for (int index = 0; index < 12; index++) {
-      YearMonth month = start.plusMonths(index);
-      months.add(
-          new Option(
-              String.format("%04d-%02d", month.getYear(), month.getMonthValue()),
-              month.atDay(1).format(MONTH_LABEL)));
-    }
-    return months;
+  public static List<FeeRow> licenceFees() {
+    return LICENCE_FEES;
   }
 
   /** Label for a selected value; unknown values are returned unchanged. */

@@ -3,7 +3,6 @@ package uk.gov.example;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,7 +26,6 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -219,7 +217,7 @@ class RemainingCoverageTest {
   }
 
   @Test
-  void journeyNullRegionsAndEmptyEvidence() throws Exception {
+  void journeyCountryValidationRejectsEmpty() throws Exception {
     Cookie session = mockMvc.perform(get("/")).andReturn().getResponse().getCookie(SessionFilter.COOKIE_NAME);
     String csrf = csrf(mockMvc.perform(get("/where-you-will-fish").cookie(session)).andReturn());
     mockMvc
@@ -230,19 +228,15 @@ class RemainingCoverageTest {
                 .param("csrf", csrf))
         .andExpect(redirectedUrl("/where-you-will-fish"));
 
-    csrf = csrf(mockMvc.perform(get("/evidence").cookie(session)).andReturn());
-    MockMultipartFile empty =
-        new MockMultipartFile("evidence", "proof.pdf", "application/pdf", new byte[0]);
+    csrf = csrf(mockMvc.perform(get("/where-you-will-fish").cookie(session)).andReturn());
     mockMvc
-        .perform(multipart("/evidence").file(empty).cookie(session).param("csrf", csrf))
-        .andExpect(status().is3xxRedirection());
-
-    csrf = csrf(mockMvc.perform(get("/evidence").cookie(session)).andReturn());
-    MockMultipartFile badExt =
-        new MockMultipartFile("evidence", "proof.exe", "application/octet-stream", "x".getBytes());
-    mockMvc
-        .perform(multipart("/evidence").file(badExt).cookie(session).param("csrf", csrf))
-        .andExpect(redirectedUrl("/evidence"));
+        .perform(
+            post("/where-you-will-fish")
+                .cookie(session)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .param("csrf", csrf)
+                .param("country", "England"))
+        .andExpect(redirectedUrl("/email"));
   }
 
   @Test
@@ -350,16 +344,16 @@ class RemainingCoverageTest {
   }
 
   @Test
-  void validationMonthAlphaAndPostcodeEmptyAndAgeMonthDelta() {
+  void validationDateEdgesAndLicenceValues() {
     LocalDate now = LocalDate.of(2026, 9, 28);
     assertThat(Validation.validateDateOfBirth("1", "ab", "2000", now)).isNotEmpty();
-    assertThat(Validation.validateAddress("1", "Town", "")).isNotEmpty();
-    assertThat(Validation.validateAddress("1", "Town", "NOTAPOSTCODE")).isNotEmpty();
     assertThat(Validation.validateDateOfBirth("1", "10", "2013", now)).isNotEmpty();
+    assertThat(Validation.validateLicenceLength("8-days")).isEmpty();
+    assertThat(Validation.validateCountry("France")).isNotEmpty();
   }
 
   @Test
-  void answersNullBlankAndZeroDateParts() throws Exception {
+  void answersNullBlankAndRawDateParts() throws Exception {
     Method row =
         Answers.class.getDeclaredMethod(
             "row", String.class, String.class, String.class, String.class);
@@ -371,22 +365,25 @@ class RemainingCoverageTest {
     app.setDay("1");
     app.setMonth("0");
     app.setYear("2000");
-    Answers.summaryRows(app, LocalDate.of(2026, 1, 1));
+    Params dobValue = (Params) Answers.summaryRows(app).get(2).get("value");
+    assertThat(dobValue.get("text")).isEqualTo("1 0 2000");
+    app.setDay("");
+    app.setMonth("1");
+    app.setYear("2000");
+    Params blankDay = (Params) Answers.summaryRows(app).get(2).get("value");
+    assertThat(blankDay.get("text")).isEqualTo("Not provided");
+    app.setDay("1");
+    app.setMonth("");
+    app.setYear("2000");
+    Params blankMonth = (Params) Answers.summaryRows(app).get(2).get("value");
+    assertThat(blankMonth.get("text")).isEqualTo("Not provided");
     app.setDay("1");
     app.setMonth("1");
-    app.setYear("0");
-    Answers.summaryRows(app, LocalDate.of(2026, 1, 1));
-
-    Method formatAddress =
-        Answers.class.getDeclaredMethod("formatAddress", LicenceApplication.class);
-    formatAddress.setAccessible(true);
-    app.setAddressLine1("A");
-    app.setAddressLine2(null);
-    // setter coerces null → ""; use reflection to force null field
-    var field = LicenceApplication.class.getDeclaredField("addressLine2");
-    field.setAccessible(true);
-    field.set(app, null);
-    assertThat(formatAddress.invoke(null, app).toString()).contains("A");
+    app.setYear("");
+    Params blankYear = (Params) Answers.summaryRows(app).get(2).get("value");
+    assertThat(blankYear.get("text")).isEqualTo("Not provided");
+    Params blankValue = (Params) row.invoke(null, "Key", "   ", "/x", "hidden");
+    assertThat(((Params) blankValue.get("value")).get("text")).isEqualTo("Not provided");
   }
 
   private static String csrf(MvcResult result) throws Exception {

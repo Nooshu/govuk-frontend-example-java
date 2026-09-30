@@ -34,7 +34,7 @@ class WebHelpersTest {
 
     assertThat(govuk.button("Continue").value()).contains("govuk-button");
     assertThat(govuk.buttonLink("Continue", "/").value()).contains("href");
-    assertThat(govuk.startButton("Start", "/task-list").value()).contains("Start");
+    assertThat(govuk.startButton("Start", "/licence-length").value()).contains("Start");
     assertThat(govuk.render("tag", Params.of("text", "Done")).value()).contains("Done");
     assertThat(govuk.render("tag", Map.of("text", "Mapped")).value()).contains("Mapped");
     assertThat(GovukViewHelper.map("a", 1, "b", 2)).containsEntry("a", 1);
@@ -53,9 +53,9 @@ class WebHelpersTest {
     assertThat(session.takeNotice("/cookies")).isEqualTo("ok");
     session.setCookieBannerConfirm("accept");
     assertThat(session.cookieBannerConfirm()).isEqualTo("accept");
-    assertThat(SessionData.referenceFor("abcdef123")).startsWith("RL");
-    assertThat(SessionData.referenceFor("ab")).isEqualTo("RLAB");
-    assertThat(SessionData.referenceFor("")).isEqualTo("RL");
+    assertThat(SessionData.referenceFor("abcdef123")).matches("FR\\d{8}");
+    assertThat(SessionData.referenceFor("ab")).matches("FR\\d{8}");
+    assertThat(SessionData.referenceFor("")).isEqualTo("FR00000000");
     assertThat(WebSessions.safeReturn("/fees")).isEqualTo("/fees");
     assertThat(WebSessions.safeReturn("//evil")).isEqualTo("/");
     assertThat(WebSessions.csrfOk(session, session.csrfToken())).isTrue();

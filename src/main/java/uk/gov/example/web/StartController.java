@@ -44,7 +44,7 @@ public class StartController {
     SessionData session = WebSessions.require(request);
     boolean welsh = "cy".equals(lang);
     String heading =
-        welsh ? "Gwneud cais am drwydded bysgota" : "Apply for a rod fishing licence";
+        welsh ? "Gwneud cais am drwydded bysgota" : "Apply for a fishing rod licence";
     chrome.apply(model, request, session, heading, false, lang, true, "");
 
     model.addAttribute(
@@ -64,7 +64,7 @@ public class StartController {
                     "text",
                     welsh ? "Dechrau nawr" : "Start now",
                     "href",
-                    "/task-list",
+                    "/licence-length",
                     "isStartButton",
                     true))));
     model.addAttribute(
@@ -112,8 +112,8 @@ public class StartController {
                     "html",
                     new TrustedHtml(
                         welsh
-                            ? "<ul class=\"govuk-list govuk-list--bullet\"><li>Eich enw</li><li>Eich dyddiad geni</li><li>Eich cyfeiriad</li></ul>"
-                            : "<ul class=\"govuk-list govuk-list--bullet\"><li>Your name</li><li>Your date of birth</li><li>Your address</li></ul>")))));
+                            ? "<ul class=\"govuk-list govuk-list--bullet\"><li>Pa mor hir mae angen y drwydded</li><li>Eich enw</li><li>Eich dyddiad geni</li><li>Y wlad lle byddwch yn pysgota</li><li>Eich cyfeiriad e-bost</li></ul>"
+                            : "<ul class=\"govuk-list govuk-list--bullet\"><li>How long you need the licence</li><li>Your name</li><li>Your date of birth</li><li>The country where you will fish</li><li>Your email address</li></ul>")))));
     model.addAttribute("demosEnabled", properties.demosEnabled());
     return "pages/start";
   }

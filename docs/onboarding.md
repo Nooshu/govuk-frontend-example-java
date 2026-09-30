@@ -10,7 +10,7 @@ A **Java specialised line** for **GDS-compliant** frontends: **Spring Boot + Thy
 
 **GOV.UK Frontend is Node + Nunjucks upstream.** Install `govuk-frontend` from npm for fixtures, CSS (via Sass), and JS — do **not** call Nunjucks at request time from this Java line.
 
-**Demo service:** [example-service.md](example-service.md) (rod fishing licence). **Hosting:** [deploying-on-render.md](deploying-on-render.md).
+**Demo service:** [example-service.md](example-service.md) (fishing rod licence). **Hosting:** [deploying-on-render.md](deploying-on-render.md).
 
 **Official guidance:** search the URLs in [guidance-sources.md](guidance-sources.md).
 

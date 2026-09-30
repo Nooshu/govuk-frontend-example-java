@@ -104,9 +104,9 @@ public final class SessionData {
   /** Builds the confirmation reference shown to the applicant from the session id. */
   public static String referenceFor(String sessionId) {
     if (sessionId == null || sessionId.isEmpty()) {
-      return "RL";
+      return "FR00000000";
     }
-    String prefix = sessionId.length() > 6 ? sessionId.substring(0, 6) : sessionId;
-    return "RL" + prefix.toUpperCase();
+    long n = Math.floorMod((long) sessionId.hashCode(), 100_000_000L);
+    return String.format("FR%08d", n);
   }
 }

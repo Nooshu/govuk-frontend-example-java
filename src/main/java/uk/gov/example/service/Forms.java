@@ -1,15 +1,9 @@
 package uk.gov.example.service;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import uk.gov.example.govuk.Nunjucks;
 import uk.gov.example.govuk.Params;
-import uk.gov.example.govuk.Render;
 import uk.gov.example.govuk.TrustedHtml;
 
 /** Build GOV.UK component option maps for each question page and support content. */
@@ -28,36 +22,31 @@ public final class Forms {
     return Params.of("titleText", "There is a problem", "errorList", list);
   }
 
-  public static Map<String, Params> nameFields(
+  public static Params nameField(
       LicenceApplication application, List<Validation.FieldError> errors) {
-    return Map.of(
-        "firstName",
-        textInput(
-            "first-name",
-            "First name",
-            application.firstName(),
-            errors,
+    return textInput(
+        "full-name",
+        "What is your full name?",
+        application.fullName(),
+        errors,
+        Params.of(
+            "autocomplete",
+            "name",
+            "label",
             Params.of(
-                "autocomplete", "given-name",
-                "classes", "govuk-input--width-20",
-                "spellcheck", false)),
-        "lastName",
-        textInput(
-            "last-name",
-            "Last name",
-            application.lastName(),
-            errors,
-            Params.of(
-                "autocomplete", "family-name",
-                "classes", "govuk-input--width-20",
-                "spellcheck", false)));
+                "text",
+                "What is your full name?",
+                "isPageHeading",
+                true,
+                "classes",
+                "govuk-label--l")));
   }
 
   public static Params emailField(
       LicenceApplication application, List<Validation.FieldError> errors) {
     return textInput(
         "email",
-        "Email address",
+        "What is your email address?",
         application.email(),
         errors,
         Params.of(
@@ -67,10 +56,8 @@ public final class Forms {
             "email",
             "spellcheck",
             false,
-            "classes",
-            "govuk-input--width-20",
             "hint",
-            Params.of("text", "We will send the decision to this address"),
+            Params.of("text", "This example stores the address in your browser session only."),
             "label",
             Params.of(
                 "text",
@@ -103,115 +90,38 @@ public final class Forms {
             Params.of("text", "For example, 31 3 1980"),
             "items",
             List.of(
-                Params.of("name", "day", "autocomplete", "bday-day", "value", application.day()),
-                Params.of(
-                    "name", "month", "autocomplete", "bday-month", "value", application.month()),
-                Params.of(
-                    "name", "year", "autocomplete", "bday-year", "value", application.year())));
+                Params.of("name", "day", "value", application.day()),
+                Params.of("name", "month", "value", application.month()),
+                Params.of("name", "year", "value", application.year())));
     addError(date, errors, "date-of-birth");
     return date;
   }
 
-  public static Params contactFields(
+  public static Params countryFields(
       LicenceApplication application, List<Validation.FieldError> errors) {
-    Params telephone =
-        textInput(
-            "telephone",
-            "Telephone number",
-            application.telephone(),
-            errors,
-            Params.of("type", "tel", "autocomplete", "tel", "classes", "govuk-input--width-20"));
-    String conditional = Render.mustRender("input", telephone);
-    List<Object> items = new ArrayList<>();
-    for (Options.Option option : Options.contactOptions()) {
-      if (LicenceApplication.CONTACT_BY_TELEPHONE.equals(option.value())) {
-        items.add(
-            Params.of(
-                "value",
-                option.value(),
-                "text",
-                option.text(),
-                "checked",
-                LicenceApplication.CONTACT_BY_TELEPHONE.equals(application.contactBy()),
-                "conditional",
-                Params.of("html", new TrustedHtml(conditional))));
-      } else {
-        items.add(
-            Params.of(
-                "value",
-                option.value(),
-                "text",
-                option.text(),
-                "id",
-                "contact-by",
-                "checked",
-                option.value().equals(application.contactBy())));
-      }
-    }
-    Params radios =
-        Params.of(
-            "idPrefix",
-            "contact-by",
-            "name",
-            "contact-by",
-            "fieldset",
-            Params.of(
-                "legend",
-                Params.of(
-                    "text",
-                    "How should we contact you?",
-                    "isPageHeading",
-                    true,
-                    "classes",
-                    "govuk-fieldset__legend--l")),
-            "hint",
-            Params.of("text", "We will use this if we need to ask about your application"),
-            "items",
-            items);
-    addError(radios, errors, "contact-by");
-    return radios;
-  }
-
-  public static Params regionFields(
-      LicenceApplication application, List<Validation.FieldError> errors) {
-    Map<String, Boolean> chosen = new HashMap<>();
-    for (String region : application.regions()) {
-      chosen.put(region, true);
-    }
     List<Object> items = new ArrayList<>();
     int index = 0;
-    for (Options.Option region : Options.regions()) {
+    for (Options.Option option : Options.countries()) {
       Params item =
           Params.of(
               "value",
-              region.value(),
+              option.value(),
               "text",
-              region.text(),
+              option.text(),
               "checked",
-              Boolean.TRUE.equals(chosen.get(region.value())));
+              option.value().equals(application.country()));
       if (index == 0) {
-        item.set("id", "regions");
+        item.set("id", "country");
       }
       items.add(item);
       index++;
     }
-    items.add(Params.of("divider", "or"));
-    items.add(
-        Params.of(
-            "value",
-            Options.NOT_SURE,
-            "text",
-            "I have not decided yet",
-            "behaviour",
-            "exclusive",
-            "checked",
-            Boolean.TRUE.equals(chosen.get(Options.NOT_SURE))));
-    Params checkboxes =
+    Params radios =
         Params.of(
             "idPrefix",
-            "where",
+            "country",
             "name",
-            "regions",
+            "country",
             "fieldset",
             Params.of(
                 "legend",
@@ -223,24 +133,24 @@ public final class Forms {
                     "classes",
                     "govuk-fieldset__legend--l")),
             "hint",
-            Params.of("text", "Select all that apply"),
+            Params.of("text", "This example is fictional. It does not check a real fishing area."),
             "items",
             items);
-    addError(checkboxes, errors, "regions");
-    return checkboxes;
+    addError(radios, errors, "country");
+    return radios;
   }
 
   public static Params licenceFields(
       LicenceApplication application, List<Validation.FieldError> errors) {
     List<Object> items = new ArrayList<>();
     int index = 0;
-    for (Options.LicenceOption option : Options.licenceLengths()) {
+    for (Options.Option option : Options.licenceLengths()) {
       Params item =
           Params.of(
               "value",
               option.value(),
               "text",
-              option.text() + " (" + option.fee() + ")",
+              option.text(),
               "checked",
               option.value().equals(application.licenceLength()));
       if (index == 0) {
@@ -260,7 +170,7 @@ public final class Forms {
                 "legend",
                 Params.of(
                     "text",
-                    "How long do you need a licence for?",
+                    "How long do you need the licence for?",
                     "isPageHeading",
                     true,
                     "classes",
@@ -269,188 +179,6 @@ public final class Forms {
             items);
     addError(radios, errors, "licence-length");
     return radios;
-  }
-
-  public static Params monthField(
-      LicenceApplication application, List<Validation.FieldError> errors, LocalDate now) {
-    List<Options.Option> months = Options.startMonths(now);
-    List<Object> items = new ArrayList<>();
-    items.add(
-        Params.of(
-            "value", "", "text", "Select a month", "selected", application.startMonth().isEmpty()));
-    for (Options.Option month : months) {
-      items.add(
-          Params.of(
-              "value",
-              month.value(),
-              "text",
-              month.text(),
-              "selected",
-              month.value().equals(application.startMonth())));
-    }
-    Params field =
-        Params.of(
-            "id",
-            "start-month",
-            "name",
-            "start-month",
-            "label",
-            Params.of(
-                "text",
-                "When should the licence start?",
-                "isPageHeading",
-                true,
-                "classes",
-                "govuk-label--l"),
-            "items",
-            items);
-    addError(field, errors, "start-month");
-    return field;
-  }
-
-  public static Map<String, Params> addressFields(
-      LicenceApplication application, List<Validation.FieldError> errors) {
-    Map<String, Params> fields = new HashMap<>();
-    fields.put(
-        "fieldset",
-        Params.of(
-            "legend",
-            Params.of(
-                "text",
-                "What is your address?",
-                "isPageHeading",
-                true,
-                "classes",
-                "govuk-fieldset__legend--l")));
-    fields.put(
-        "line1",
-        textInput(
-            "address-line-1",
-            "Address line 1",
-            application.addressLine1(),
-            errors,
-            Params.of("autocomplete", "address-line1")));
-    fields.put(
-        "line2",
-        textInput(
-            "address-line-2",
-            "Address line 2 (optional)",
-            application.addressLine2(),
-            errors,
-            Params.of("autocomplete", "address-line2")));
-    fields.put(
-        "town",
-        textInput(
-            "town",
-            "Town or city",
-            application.town(),
-            errors,
-            Params.of("autocomplete", "address-level2", "classes", "govuk-input--width-20")));
-    fields.put(
-        "postcode",
-        textInput(
-            "postcode",
-            "Postcode",
-            application.postcode(),
-            errors,
-            Params.of(
-                "autocomplete",
-                "postal-code",
-                "classes",
-                "govuk-input--width-10",
-                "spellcheck",
-                false)));
-    fields.put(
-        "inset",
-        Params.of(
-            "text",
-            "This example asks you to type your address. It does not look up addresses from a postcode."));
-    return fields;
-  }
-
-  public static Params evidenceField(
-      LicenceApplication application, List<Validation.FieldError> errors) {
-    Params upload =
-        Params.of(
-            "id",
-            "evidence",
-            "name",
-            "evidence",
-            "label",
-            Params.of(
-                "text",
-                "Upload evidence of a concession",
-                "isPageHeading",
-                true,
-                "classes",
-                "govuk-label--l"),
-            "hint",
-            Params.of(
-                "text",
-                "PDF, PNG, or JPG. You can skip this question if you do not have a concession."));
-    addError(upload, errors, "evidence");
-    return upload;
-  }
-
-  public static Params detailsField(
-      LicenceApplication application, List<Validation.FieldError> errors) {
-    Params details =
-        Params.of(
-            "name",
-            "additional-details",
-            "id",
-            "additional-details",
-            "maxlength",
-            200,
-            "threshold",
-            75,
-            "value",
-            application.additionalDetails(),
-            "label",
-            Params.of(
-                "text",
-                "Is there anything else we should know?",
-                "isPageHeading",
-                true,
-                "classes",
-                "govuk-label--l"),
-            "hint",
-            Params.of(
-                "text",
-                "You can skip this question. Do not include payment card numbers or passwords."));
-    addError(details, errors, "additional-details");
-    return details;
-  }
-
-  public static Map<String, Params> passwordFields(List<Validation.FieldError> errors) {
-    Params password =
-        Params.of(
-            "id",
-            "password",
-            "name",
-            "password",
-            "autocomplete",
-            "new-password",
-            "label",
-            Params.of(
-                "text", "Create a password", "isPageHeading", true, "classes", "govuk-label--l"),
-            "hint",
-            Params.of(
-                "text",
-                "Must be at least 8 characters. This example does not store your password."));
-    addError(password, errors, "password");
-    Params confirm =
-        Params.of(
-            "id",
-            "password-confirm",
-            "name",
-            "password-confirm",
-            "autocomplete",
-            "new-password",
-            "label",
-            Params.of("text", "Confirm password"));
-    addError(confirm, errors, "password-confirm");
-    return Map.of("password", password, "confirm", confirm);
   }
 
   public static Params cookieFields(String analyticsChoice, List<Validation.FieldError> errors) {
@@ -490,7 +218,7 @@ public final class Forms {
 
   public static Params feesTable() {
     List<Object> rows = new ArrayList<>();
-    for (Options.LicenceOption option : Options.licenceLengths()) {
+    for (Options.FeeRow option : Options.licenceFees()) {
       rows.add(
           List.of(
               Params.of("text", option.text()),
@@ -521,7 +249,7 @@ public final class Forms {
                 "content",
                 Params.of(
                     "text",
-                    "You can apply if you are 13 or over and you will fish with a rod in England or Wales.")),
+                    "You can apply if you are 13 or over and you will fish with a rod in England, Wales or Scotland.")),
             Params.of(
                 "heading",
                 Params.of("text", "What a licence covers"),
@@ -554,7 +282,7 @@ public final class Forms {
                 Params.of(
                     "html",
                     new TrustedHtml(
-                        "<h2 class=\"govuk-heading-l\">Before you apply</h2><p class=\"govuk-body\">You need your name, date of birth, email address, and home address.</p>"))),
+                        "<h2 class=\"govuk-heading-l\">Before you apply</h2><p class=\"govuk-body\">You need how long you need the licence, your name, date of birth, the country where you will fish, and your email address.</p>"))),
             Params.of(
                 "label",
                 "Fees",
@@ -583,7 +311,9 @@ public final class Forms {
         "Application complete",
         "html",
         new TrustedHtml(
-            "Your reference number<br><strong>" + Nunjucks.escape(reference) + "</strong>"));
+            "Your example reference number<br><strong>"
+                + Nunjucks.escape(reference)
+                + "</strong>"));
   }
 
   private static Params textInput(

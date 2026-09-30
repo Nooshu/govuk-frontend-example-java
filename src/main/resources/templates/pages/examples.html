@@ -1,0 +1,20 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-l" th:text="${heading}">Example pages</h1>
+          <p class="govuk-body">
+            These pages show GOV.UK patterns that are not steps in the rod licence application.
+          </p>
+          <ul class="govuk-list">
+            <li>
+              <a class="govuk-link" href="/examples/exit-this-page">Exit this page</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

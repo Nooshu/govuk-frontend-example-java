@@ -1,0 +1,18 @@
+<!doctype html>
+<html th:replace="~{layout/base :: layout(~{::section})}" xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <section th:fragment="section">
+      <th:block th:utext="${exitThisPageHtml}"></th:block>
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          <h1 class="govuk-heading-l" th:text="${heading}">Exit this page</h1>
+          <th:block th:utext="${warningHtml}"></th:block>
+          <th:block th:utext="${insetHtml}"></th:block>
+          <p class="govuk-body">
+            The button is the first thing on the page, which matches the component guidance.
+          </p>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

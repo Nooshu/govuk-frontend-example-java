@@ -74,6 +74,48 @@ public class SupportController {
     return "pages/about";
   }
 
+  @GetMapping("/examples")
+  public String examples(HttpServletRequest request, Model model) {
+    SessionData session = WebSessions.require(request);
+    chrome.apply(model, request, session, "Example pages", false, "en", true, "");
+    model.addAttribute("breadcrumbsHtml", breadcrumbs("Example pages"));
+    return "pages/examples";
+  }
+
+  @GetMapping("/examples/exit-this-page")
+  public String exitThisPage(HttpServletRequest request, Model model) {
+    SessionData session = WebSessions.require(request);
+    chrome.apply(model, request, session, "Exit this page", false, "en", true, "");
+    model.addAttribute(
+        "backLinkHtml",
+        chrome.html(Render.mustRender("back-link", Params.of("text", "Back", "href", "/examples"))));
+    model.addAttribute(
+        "exitThisPageHtml",
+        chrome.html(
+            Render.mustRender(
+                "exit-this-page",
+                Params.of("redirectUrl", "https://www.bbc.co.uk/weather"))));
+    model.addAttribute(
+        "warningHtml",
+        chrome.html(
+            Render.mustRender(
+                "warning-text",
+                Params.of(
+                    "text",
+                    "Use this component only on services where someone may be in danger.",
+                    "iconFallbackText",
+                    "Warning"))));
+    model.addAttribute(
+        "insetHtml",
+        chrome.html(
+            Render.mustRender(
+                "inset-text",
+                Params.of(
+                    "text",
+                    "This page is an example of the component. It is not part of the rod licence application. Choosing the button leaves this example and opens the BBC weather forecast."))));
+    return "pages/exit-this-page";
+  }
+
   @GetMapping("/updates")
   public String updates(
       HttpServletRequest request,

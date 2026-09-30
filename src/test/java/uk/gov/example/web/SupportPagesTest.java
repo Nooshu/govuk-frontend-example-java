@@ -41,6 +41,15 @@ class SupportPagesTest {
     mockMvc.perform(get("/guidance").cookie(session)).andExpect(status().isOk());
     mockMvc.perform(get("/accessibility").cookie(session)).andExpect(status().isOk());
     mockMvc.perform(get("/about").cookie(session)).andExpect(status().isOk());
+    mockMvc
+        .perform(get("/examples").cookie(session))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Example pages")))
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("href=\"/examples\"")));
+    mockMvc
+        .perform(get("/examples/exit-this-page").cookie(session))
+        .andExpect(status().isOk())
+        .andExpect(content().string(org.hamcrest.Matchers.containsString("Exit this page")));
     mockMvc.perform(get("/updates").cookie(session)).andExpect(status().isOk());
     mockMvc.perform(get("/updates").param("page", "2").cookie(session)).andExpect(status().isOk());
     mockMvc

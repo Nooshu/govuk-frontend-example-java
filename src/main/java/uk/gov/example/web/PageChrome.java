@@ -158,6 +158,7 @@ public class PageChrome {
     items.add(Params.of("href", "/about", "text", "About this example"));
     if (properties.demosEnabled()) {
       items.add(Params.of("href", "/components", "text", "Component catalogue"));
+      items.add(Params.of("href", "/examples", "text", "Example pages"));
     }
     Params footer = Params.of("meta", Params.of("items", items));
     if (welsh) {

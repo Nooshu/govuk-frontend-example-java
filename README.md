@@ -1,5 +1,16 @@
 # GOV.UK Frontend example (Java)
 
+> [!WARNING]
+> 🚨 **Example repository only**
+>
+> This repository was created as a demonstration and will not be actively maintained or supported. It is not an official UK government project and is not endorsed, maintained, or supported by any UK government department, the Government Digital Service (GDS), or the GOV.UK Design System team.
+>
+> You are welcome to fork this repository and adapt, use, and maintain it within your own department or organisation. However, I will not be providing ongoing maintenance, updates, security fixes, or technical support.
+>
+> Use this code at your own risk. You are responsible for reviewing, testing, securing, maintaining, and ensuring the suitability of the code before using it in any service or production environment. I accept no responsibility or liability for any loss, damage, security issue, service failure, or other consequence resulting from its use.
+>
+> This repository is released under the MIT Licence. See the [LICENSE](LICENSE) file for the full licence terms.
+
 **Specialised Java line** of the GDS-compliant frontend template: **Spring Boot + Thymeleaf** + **[GOV.UK Frontend](https://frontend.design-system.service.gov.uk/)** — **no** React/Vue/Angular/Svelte for UI. Official fixtures enable **100% HTML parity** testing of Java-rendered component HTML.
 
 **Stack:** Java 25 · Spring Boot 4.1 · Thymeleaf · Maven — see [`docs/tech-stack.md`](docs/tech-stack.md).

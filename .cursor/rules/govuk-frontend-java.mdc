@@ -61,9 +61,7 @@ Use:
 
 Use current stable, supported releases unless the repository explicitly pins another version.
 
-Prefer established ecosystem dependencies over small convenience libraries.
-
-Keep dependencies to a sensible minimum.
+Prefer established ecosystem dependencies and a small surface — see [safe-dependency-updates](../skills/safe-dependency-updates/SKILL.md).
 
 ## GOV.UK Frontend
 
@@ -395,17 +393,9 @@ Pin the GOV.UK Frontend version.
 
 Do not silently load a different version from a CDN.
 
-## Dependency management
+## Dependencies
 
-Use Maven.
-
-Commit the Maven Wrapper.
-
-Pin important dependencies through normal Maven dependency management.
-
-Avoid unnecessary dependencies.
-
-Run dependency and vulnerability checks where practical.
+Dependency updates, lockfiles, audits, and Dependabot / Renovate review follow [`.cursor/skills/safe-dependency-updates/SKILL.md`](../skills/safe-dependency-updates/SKILL.md). Keep the dependency surface small; prefer platform / standard-library APIs first. Do **not** start or complete dependency changes while CI is red.
 
 ## Code quality
 

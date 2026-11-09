@@ -10,7 +10,7 @@ A **Java specialised line** for **GDS-compliant** frontends: **Spring Boot + Thy
 
 **GOV.UK Frontend is Node + Nunjucks upstream.** Install `govuk-frontend` from npm for fixtures, CSS (via Sass), and JS — do **not** call Nunjucks at request time from this Java line.
 
-**Demo service:** [example-service.md](example-service.md) (fishing rod licence). **Hosting:** [deploying-on-render.md](deploying-on-render.md).
+**Demo service:** [example-service.md](example-service.md) (fishing rod licence). **Hosting:** [deploying-on-cloud-run.md](deploying-on-cloud-run.md).
 
 **Official guidance:** search the URLs in [guidance-sources.md](guidance-sources.md).
 
@@ -39,7 +39,7 @@ src/main/java/uk/gov/example/
   session/                # In-memory sessions
 src/main/resources/templates/
 src/test/java/…           # Fixture parity + journey + unit tests
-Dockerfile / render.yaml  # Render.com demo hosting
+Dockerfile                # Cloud Run demo hosting
 ```
 
 ## Run modes
@@ -49,7 +49,7 @@ Dockerfile / render.yaml  # Render.com demo hosting
 | Preview | `npm ci && npm run build:styles && DEMOS_ENABLED=true ./mvnw spring-boot:run` |
 | Test    | `npm test` then `./mvnw test`                                                 |
 | Verify  | `npm run verify && ./mvnw verify`                                             |
-| Deploy  | See [deploying-on-render.md](deploying-on-render.md)                          |
+| Deploy  | See [deploying-on-cloud-run.md](deploying-on-cloud-run.md)                    |
 
 ## Testing mindset
 
@@ -63,5 +63,5 @@ Details: [testing-components.md](testing-components.md).
 
 - [example-service.md](example-service.md)
 - [preview-server.md](preview-server.md)
-- [deploying-on-render.md](deploying-on-render.md)
+- [deploying-on-cloud-run.md](deploying-on-cloud-run.md)
 - [styles.md](styles.md) — Sass cascade; no `!important` in service CSS

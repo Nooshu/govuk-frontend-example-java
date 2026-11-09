@@ -22,7 +22,7 @@ How we keep docs dual-purpose: [documentation-structure.md](documentation-struct
 | [frontend-security.md](frontend-security.md)             | OWASP response headers, CSP, cookies              |
 | [tech-stack.md](tech-stack.md)                           | Java 25 / Spring Boot / Thymeleaf + Frontend Node |
 | [example-service.md](example-service.md)                 | Rod fishing licence demo journey                  |
-| [deploying-on-render.md](deploying-on-render.md)         | Render.com Docker Blueprint + deploy checklist    |
+| [deploying-on-cloud-run.md](deploying-on-cloud-run.md)   | Google Cloud Run Docker deploy + checklist        |
 | [guidance-sources.md](guidance-sources.md)               | Official GDS / Service Manual / Frontend URLs     |
 | [documentation-structure.md](documentation-structure.md) | Dual-audience docs + language practice rules      |
 | [CONTRIBUTING.md](../CONTRIBUTING.md)                    | How to contribute, local checks, PR expectations  |

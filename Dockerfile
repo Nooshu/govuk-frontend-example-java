@@ -1,4 +1,4 @@
-# Multi-stage build for Render.com (and local Docker).
+# Multi-stage build for Cloud Run (and local Docker).
 # Stage 1: Node — install Frontend pin and compile Sass
 # Stage 2: Maven — package Spring Boot jar
 # Stage 3: JRE — run the service with assets available
@@ -28,5 +28,5 @@ COPY baseline ./baseline
 COPY --from=build /build/target/govuk-frontend-example-java-*.jar ./app.jar
 ENV JAVA_OPTS=""
 EXPOSE 8080
-# Render injects PORT; Spring reads server.port=${PORT:8080}
+# Cloud Run injects PORT. Spring reads server.port=${PORT:8080}.
 CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

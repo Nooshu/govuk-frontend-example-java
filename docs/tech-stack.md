@@ -54,15 +54,15 @@ npm run verify && ./mvnw verify
 | Page template reference         | https://design-system.service.gov.uk/styles/page-template/                                                      |
 | Fixture testing guide           | https://frontend.design-system.service.gov.uk/testing-your-html/                                                |
 | Preview                         | `/components` catalogue; `/components/:name?fixture=` previews (gated by `DEMOS_ENABLED` in production)         |
-| Deploy                          | Docker on Render — see [deploying-on-render.md](deploying-on-render.md)                                         |
+| Deploy                          | Docker on Cloud Run — see [deploying-on-cloud-run.md](deploying-on-cloud-run.md)                                |
 
 ## Environment
 
-| Variable        | Default / behaviour                                                     |
-| --------------- | ----------------------------------------------------------------------- |
-| `PORT`          | `8080` locally; Render injects                                          |
-| `DEMOS_ENABLED` | unset/false hides catalogue in production; Render Blueprint sets `true` |
-| `NODE_ENV`      | `production` implies demos off unless `DEMOS_ENABLED` overrides         |
+| Variable        | Default / behaviour                                                      |
+| --------------- | ------------------------------------------------------------------------ |
+| `PORT`          | `8080` locally; Cloud Run injects                                        |
+| `DEMOS_ENABLED` | unset/false hides catalogue in production; the deploy script sets `true` |
+| `NODE_ENV`      | `production` implies demos off unless `DEMOS_ENABLED` overrides          |
 
 ## Hard constraints
 

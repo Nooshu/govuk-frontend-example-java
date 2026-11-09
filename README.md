@@ -37,7 +37,7 @@
 
 - **Apply for a fishing rod licence** — demo journey from start to confirmation ([`docs/example-service.md`](docs/example-service.md))
 - **Component catalogue** at `/components` — every Frontend 6.5.1 component with all fixture variations ([`docs/preview-server.md`](docs/preview-server.md))
-- **Render.com** Docker Blueprint for a public blog demo ([`docs/deploying-on-render.md`](docs/deploying-on-render.md))
+- **Google Cloud Run** for a public blog demo ([`docs/deploying-on-cloud-run.md`](docs/deploying-on-cloud-run.md))
 
 ## Related language lines
 
@@ -78,7 +78,7 @@ npm run verify          # docs + Sass + baseline tests
 
 ## Deploy
 
-See [`docs/deploying-on-render.md`](docs/deploying-on-render.md) for the Blueprint checklist.
+See [`docs/deploying-on-cloud-run.md`](docs/deploying-on-cloud-run.md) for the deploy checklist.
 
 ## Licence and security
 

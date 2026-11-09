@@ -16,9 +16,9 @@ npm run build:styles
 
 Opens at <http://127.0.0.1:8080> (server listens on all interfaces by default). Set `PORT` to use another port.
 
-Public demo hosting: [deploying-on-render.md](deploying-on-render.md).
+Public demo hosting: [deploying-on-cloud-run.md](deploying-on-cloud-run.md).
 
-`DEMOS_ENABLED=true` keeps the component catalogue and developer previews on (set on the Render demo). Without it, production-style runs hide `/components`.
+`DEMOS_ENABLED=true` keeps the component catalogue and developer previews on (set on the Cloud Run demo). Without it, production-style runs hide `/components`.
 
 ## Start to confirmation
 
